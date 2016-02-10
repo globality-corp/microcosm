@@ -7,8 +7,8 @@ setup(
     name=project,
     version=version,
     description="Marquez - Simple microservice configuration",
-    author="Globality",
-    author_email="devnull@globality.com",
+    author="Globality Engineering",
+    author_email="engineering@globality.com",
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     include_package_data=True,
     zip_safe=False,
@@ -23,7 +23,6 @@ setup(
     ],
     entry_points={
     },
-    test_suite="tests",
     tests_require=[
         "coverage>=3.7.1",
         "mock>=1.0.1",
