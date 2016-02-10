@@ -5,31 +5,50 @@ a fleet of such services, each performing a different function. Inevitably, thes
 will use common code and structure; this library provides a simple mechanism for constructing
 these shared components and wiring them together into services.
 
+
+## Terminology
+
+ -  A `microservice` is a small software application. It is composed of several smaller pieces
+    of software, many of which are reusable.
+ -  A `component` is one of these (possibly reusable) pieces of software.
+ -  A `factory` is a function used to create a component; it may be an object's constructor.
+ -  A `config dict` is a nested dictionary with string-valued keys. It contains data used
+    by factories to create components.
+ -  An `object graph` is a collection of components that may reference each other (acyclically).
+ -  A `binding` is a string-valued key. It is used to identify a component within an object graph
+    and the subsection of the config dict reserved for a component's factory.
+
+
 ## Basic Usage
 
- 1. Define factory functions for `components`, attach them to a `namespace`, and provide
+ 1. Define factory functions for `components`, attach them to a `binding`, and provide
     (optional) configuration `defaults`:
 
-        from marquez import defaults, namespace
+        from marquez import defaults, binding
 
-        @namespace("foo")
+        @binding("foo")
         @defaults(baz="value")
         def create_foo(graph, config):
-            return dict(bar=graph.bar, baz=config.foo.baz)
+            return dict(
+                # factories can reference other components
+                bar=graph.bar,
+                # factories can reference configuration
+                baz=config.foo.baz,
+            )
 
-        @namespace("bar")
+        @binding("bar")
         def create_bar(graph, config):
             return dict()
 
-    Factory functions have access to a directed graph of components (see next) as well as
-    configuration data. Default configuration values, if provided, are pre-populated within the
-    provided namespace; these may be overridden from data loaded from an external source.
+    Factory functions have access to the `object graph` and the `config dict`. Default configuration
+    values, if provided, are pre-populated within the provided binding; these may be overridden from
+    data loaded from an external source.
 
- 2. Wire together the service by creating a new graph along with service metadata:
+ 2. Wire together the microservice by creating a new object graph along with service metadata:
 
-        from marquez import Graph
+        from marquez import create_object_graph
 
-        graph = Graph(
+        graph = create_object_graph(
             name="myservice",
             debug=False,
             testing=False,
@@ -38,27 +57,54 @@ these shared components and wiring them together into services.
     Factories may access the service metadata via `graph.metadata`. This allows for several
     best practices:
 
-     -  Components can implement global conventions (e.g. for logging or persistence), using
-        the service name as a discriminator.
+     -  Components can implement ecosystem-wide conventions (e.g. for logging or persistence),
+        using the service name as a discriminator.
      -  Components can customize their behavior during development (`debug=True`) and unit
         testing (`testing=True`)
 
- 3. Reference any `namespace` in the object graph to access the corresponding `component`:
+ 3. Reference any `binding` in the `object graph` to access the corresponding `component`:
 
         print graph.foo
 
-    By default, components are initialized *lazily*. In this example, accessing `graph.foo`
-    would automatically invoke `create_foo()` and that function's reference to `graph.bar`
-    would, in turn, invoke `create_bar()`.
+    Components are initialized *lazily*. In this example, the first time `graph.foo` is accessed,
+    the bound factory (`create_foo()`) is automatically invoked. Since this factory in turn
+    accesses `graph.bar`, the next factory in the chain (`create_bar()`) would also be called
+    if it had not been called yet.
 
     Graph cycles are not allowed, although dependent components may cache the graph instance
     to access depending components after initialization completes.
 
- 4. Optionally, initialize the service's components explicitly:
+ 4. Optionally, initialize the microservice's components explicitly:
 
         graph.use(
             "foo",
+            "bar",
         )
 
-    This construction initializes the listed components up front and then *disables* further
-    lazy initializtion, allowing services to catch initialization errors early.
+    While the same effect could be achieved by accessing `graph.foo` or `graph.bar`, this
+    construction has the advantage of initializes the listed components up front and triggering
+    any configuration errors as early as possible.
+
+    It is also possible to then *disable* any subsequent lazy initialization, preventing any
+    unintended initialization during subsequent operations:
+
+        graph.lock()
+
+
+## Assumptions
+
+This library was influenced by the [pinject](https://github.com/google/pinject) project, but
+makes a few assumption that allow for a great deal of simplication:
+
+ 1. Microservices are small enough that simple string bindings suffice. Or, put another way,
+    conflicts between identically bound components are a non-concern.
+
+ 2. Microservices use processes, not threads to scale. As such, thread synchronization is
+    a non-goal.
+
+ 3. Mocking (and patching) of the object graph is important and needs to be easy. Unit tests
+    expect to use the ubiquitous [mock](https://github.com/testing-cabal/mock) library; it
+    should be trivial to temporarily replace a component.
+
+ 4. Some components will be functions that modify other components rather than objects
+    that need to be instantiated.
