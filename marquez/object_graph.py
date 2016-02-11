@@ -1,4 +1,6 @@
 """Object Graph"""
+from contextlib import contextmanager
+
 from marquez.configuration import Configuration
 from marquez.errors import CyclicGraphError, LockedGraphError
 from marquez.decorators import get_defaults
@@ -7,7 +9,7 @@ from marquez.metadata import Metadata
 from marquez.registry import _registry
 
 
-MARKER = object()
+RESERVED = object()
 
 
 class ObjectGraph(object):
@@ -55,10 +57,13 @@ class ObjectGraph(object):
 
         If the component is not present, it will be lazily created.
 
+        :raises CyclicGraphError: if the factory function requires a cycle
+        :raises LockedGraphError: if the graph is locked
+
         """
         try:
             component = self._components[key]
-            if component is MARKER:
+            if component is RESERVED:
                 raise CyclicGraphError()
             return component
         except KeyError:
@@ -66,20 +71,31 @@ class ObjectGraph(object):
                 raise LockedGraphError()
             return self._resolve_key(key)
 
+    @contextmanager
+    def _reserve(self, key):
+        """
+        Reserve a component's binding temporarily.
+
+        Protects against cycles.
+
+        """
+        self._components[key] = RESERVED
+        try:
+            yield
+        finally:
+            del self._components[key]
+
     def _resolve_key(self, key):
         """
         Attempt to lazily create a component.
 
         :raises NotBoundError: if the component does not have a bound factory
+        :raises CyclicGraphError: if the factory function requires a cycle
+        :raises LockedGraphError: if the graph is locked
         """
-        # save a placeholder in the registry to detect cycles
-        self._components[key] = MARKER
-        try:
+        with self._reserve(key):
             factory = self._registry.resolve(key)
             component = factory(self)
-        finally:
-            # remove the marker
-            del self._components[key]
 
         self._components[key] = component
         return component
