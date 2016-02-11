@@ -9,6 +9,14 @@ class AlreadyBoundError(Exception):
     pass
 
 
+class CyclicGraphError(Exception):
+    """
+    Raised if a graph has a cycle.
+
+    """
+    pass
+
+
 class LockedGraphError(Exception):
     """
     Raised when attempting to create a component in a locked object graph.

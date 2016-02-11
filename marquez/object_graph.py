@@ -1,10 +1,13 @@
 """Object Graph"""
 from marquez.configuration import Configuration
-from marquez.errors import LockedGraphError
+from marquez.errors import CyclicGraphError, LockedGraphError
 from marquez.decorators import get_defaults
 from marquez.loaders import load_from_python_file
 from marquez.metadata import Metadata
 from marquez.registry import _registry
+
+
+MARKER = object()
 
 
 class ObjectGraph(object):
@@ -54,7 +57,10 @@ class ObjectGraph(object):
 
         """
         try:
-            return self._components[key]
+            component = self._components[key]
+            if component is MARKER:
+                raise CyclicGraphError()
+            return component
         except KeyError:
             if self._locked:
                 raise LockedGraphError()
@@ -66,8 +72,16 @@ class ObjectGraph(object):
 
         :raises NotBoundError: if the component does not have a bound factory
         """
-        factory = self._registry.resolve(key)
-        self._components[key] = component = factory(self)
+        # save a placeholder in the registry to detect cycles
+        self._components[key] = MARKER
+        try:
+            factory = self._registry.resolve(key)
+            component = factory(self)
+        finally:
+            # remove the marker
+            del self._components[key]
+
+        self._components[key] = component
         return component
 
 
