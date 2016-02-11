@@ -24,7 +24,7 @@ these shared components and wiring them together into services.
  1. Define factory functions for `components`, attach them to a `binding`, and provide
     (optional) configuration `defaults`:
 
-        from marquez import defaults, binding
+        from marquez.api import defaults, binding
 
         @binding("foo")
         @defaults(baz="value")
@@ -46,7 +46,7 @@ these shared components and wiring them together into services.
 
  2. Wire together the microservice by creating a new object graph along with service metadata:
 
-        from marquez import create_object_graph
+        from marquez.api import create_object_graph
 
         graph = create_object_graph(
             name="myservice",
