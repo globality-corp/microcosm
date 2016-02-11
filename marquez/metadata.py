@@ -11,7 +11,7 @@ class Metadata(object):
 
     def __init__(self, name, debug=False, testing=False):
         """
-        :param name: the name of the service
+        :param name: the name of the microservice
         :param debug: is development debugging enabled?
         :param testing: is unit testing enabled?
         """

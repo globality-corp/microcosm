@@ -1,7 +1,7 @@
 """Example component factory"""
 
 
-def create_hello_world(graph, context):
+def create_hello_world(graph):
     """
     Produces the string "hello world"
 

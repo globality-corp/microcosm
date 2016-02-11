@@ -20,6 +20,7 @@ def test_attribute_access():
         key="value",
         nested=dict(
             nested_key="nested_value",
+            other_key=range(10),
         )
     )
     assert_that(config, has_entry("key", "value"))

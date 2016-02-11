@@ -1,4 +1,5 @@
 """Registry of component factories"""
+from itertools import chain
 from pkg_resources import iter_entry_points
 
 from marquez.errors import AlreadyBoundError, NotBoundError
@@ -13,6 +14,24 @@ class Registry(object):
     """
     def __init__(self):
         self.factories = {}
+        # We need to load entry points up front in order to access their defaults
+        self.entry_points = {
+            entry_point.name: entry_point.load()
+            # NB: it's possible to have two entry points for the same name
+            # (but in different distributions). This will cause unpredictable
+            # behavior; don't do that.
+            for entry_point in iter_entry_points(group="marquez.factories")
+        }
+
+    @property
+    def all(self):
+        """
+        Return a synthetic dictionary of all factories.
+        """
+        return {
+            key: value
+            for key, value in chain(self.entry_points.items(), self.factories.items())
+        }
 
     def bind(self, key, factory):
         """
@@ -55,13 +74,10 @@ class Registry(object):
         """
         Resolve using entry points.
 
-        If there are multiple entry point bindings exist for the key, resolution
-        order is arbitray; so don't do that.
-
         """
-        for entry_point in iter_entry_points(group="marquez.factories", name=key):
-            return entry_point.load()
-        else:
+        try:
+            return self.entry_points[key]
+        except KeyError:
             raise NotBoundError(key)
 
 
