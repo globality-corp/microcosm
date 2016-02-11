@@ -22,6 +22,9 @@ setup(
     dependency_links=[
     ],
     entry_points={
+        "marquez.factories": [
+            "hello_world = marquez.example:create_hello_world"
+        ],
     },
     tests_require=[
         "coverage>=3.7.1",

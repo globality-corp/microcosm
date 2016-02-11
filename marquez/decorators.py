@@ -14,7 +14,7 @@ def binding(key, registry=_registry):
 
     """
     def decorator(func):
-        registry.register(key, func)
+        registry.bind(key, func)
         return func
     return decorator
 
