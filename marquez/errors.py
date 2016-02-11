@@ -9,6 +9,14 @@ class AlreadyBoundError(Exception):
     pass
 
 
+class LockedGraphError(Exception):
+    """
+    Raised when attempting to create a component in a locked object graph.
+
+    """
+    pass
+
+
 class NotBoundError(Exception):
     """
     Raised if not factory is bound to a name.

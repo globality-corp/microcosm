@@ -1,5 +1,6 @@
 """Object Graph"""
 from marquez.configuration import Configuration
+from marquez.errors import LockedGraphError
 from marquez.decorators import get_defaults
 from marquez.loaders import load_from_python_file
 from marquez.metadata import Metadata
@@ -17,8 +18,33 @@ class ObjectGraph(object):
     def __init__(self, metadata, config, registry):
         self.metadata = metadata
         self.config = config
+        self._locked = False
         self._registry = registry
         self._components = {}
+
+    def use(self, *keys):
+        """
+        Explicitly initialize a set of components by their binding keys.
+
+        """
+        return [
+            getattr(self, key)
+            for key in keys
+        ]
+
+    def lock(self):
+        """
+        Lock the graph so that new components cannot be created.
+
+        """
+        self._locked = True
+
+    def unlock(self):
+        """
+        Unlock the graph so that new components can created.
+
+        """
+        self._locked = False
 
     def __getattr__(self, key):
         """
@@ -30,6 +56,8 @@ class ObjectGraph(object):
         try:
             return self._components[key]
         except KeyError:
+            if self._locked:
+                raise LockedGraphError()
             return self._resolve_key(key)
 
     def _resolve_key(self, key):
