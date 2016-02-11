@@ -14,6 +14,7 @@ setup(
     zip_safe=False,
     keywords="marquez",
     install_requires=[
+        "inflection>=0.3.1",
     ],
     setup_requires=[
         "nose>=1.3.6",
