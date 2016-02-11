@@ -14,7 +14,6 @@ setup(
     zip_safe=False,
     keywords="marquez",
     install_requires=[
-        "easydict>=1.6",
     ],
     setup_requires=[
         "nose>=1.3.6",
