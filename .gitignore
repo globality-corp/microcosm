@@ -1,4 +1,4 @@
-## 
+##
 # .gitignore
 #
 # Based on:
@@ -78,6 +78,7 @@ htmlcov/
 nosetests.xml
 coverage.xml
 *,cover
+cover
 
 # Translations
 *.mo

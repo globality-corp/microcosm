@@ -62,7 +62,7 @@ def load_from_python_file(metadata):
     """
     def load_python_module(data):
         module = new_module("magic")
-        exec(data, module.__dict__)
+        exec(data, module.__dict__, module.__dict__)
         return {
             key: value
             for key, value in module.__dict__.items()
