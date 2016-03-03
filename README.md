@@ -5,7 +5,8 @@ a fleet of such services, each performing a different function. Inevitably, thes
 will use common code and structure; this library provides a simple mechanism for constructing
 these shared components and wiring them together into services.
 
-[![Circle CI](https://circleci.com/gh/globality-corp/microcosm.svg?style=svg)](https://circleci.com/gh/globality-corp/microcosm)
+[![Circle CI](https://circleci.com/gh/globality-corp/microcosm/tree/develop.svg?style=svg)](https://circleci.com/gh/globality-corp/microcosm/tree/develop)
+
 
 ## Terminology
 

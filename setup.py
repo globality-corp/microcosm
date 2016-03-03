@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from setuptools import find_packages, setup
 
 project = "microcosm"
@@ -9,6 +10,7 @@ setup(
     description="Microcosm - Simple microservice configuration",
     author="Globality Engineering",
     author_email="engineering@globality.com",
+    url="https://github.com/globality-corp/microcosm",
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     include_package_data=True,
     zip_safe=False,
