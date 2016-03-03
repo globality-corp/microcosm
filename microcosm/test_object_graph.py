@@ -9,10 +9,10 @@ from hamcrest import (
 )
 from mock import Mock
 
-from marquez.decorators import defaults, binding
-from marquez.errors import CyclicGraphError, LockedGraphError
-from marquez.object_graph import create_object_graph
-from marquez.registry import Registry
+from microcosm.decorators import defaults, binding
+from microcosm.errors import CyclicGraphError, LockedGraphError
+from microcosm.object_graph import create_object_graph
+from microcosm.registry import Registry
 
 
 class Parent(object):

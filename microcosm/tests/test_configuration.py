@@ -8,7 +8,7 @@ from hamcrest import (
     is_,
 )
 
-from marquez.configuration import Configuration
+from microcosm.configuration import Configuration
 
 
 def test_attribute_access():

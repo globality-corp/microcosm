@@ -8,8 +8,8 @@ from hamcrest import (
     raises,
 )
 
-from marquez.errors import AlreadyBoundError, NotBoundError
-from marquez.registry import Registry
+from microcosm.errors import AlreadyBoundError, NotBoundError
+from microcosm.registry import Registry
 
 
 def create_foo(*args, **kwargs):

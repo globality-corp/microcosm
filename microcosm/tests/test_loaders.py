@@ -12,12 +12,12 @@ from hamcrest import (
     none,
 )
 
-from marquez.loaders import (
+from microcosm.loaders import (
     get_config_filename,
     load_from_json_file,
     load_from_python_file,
 )
-from marquez.metadata import Metadata
+from microcosm.metadata import Metadata
 
 
 @contextmanager

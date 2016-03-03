@@ -24,7 +24,7 @@ these shared components and wiring them together into services.
  1. Define factory functions for `components`, attach them to a `binding`, and provide
     (optional) configuration `defaults`:
 
-        from marquez.api import defaults, binding
+        from microcosm.api import defaults, binding
 
         @binding("foo")
         @defaults(baz="value")
@@ -46,7 +46,7 @@ these shared components and wiring them together into services.
 
  2. Wire together the microservice by creating a new object graph along with service metadata:
 
-        from marquez.api import create_object_graph
+        from microcosm.api import create_object_graph
 
         graph = create_object_graph(
             name="myservice",
@@ -97,7 +97,8 @@ This library was influenced by the [pinject](https://github.com/google/pinject) 
 makes a few assumption that allow for a great deal of simplication:
 
  1. Microservices are small enough that simple string bindings suffice. Or, put another way,
-    conflicts between identically bound components are a non-concern.
+    conflicts between identically bound components are a non-concern and there is no need
+    for explicit scopes.
 
  2. Microservices use processes, not threads to scale. As such, thread synchronization is
     a non-goal.

@@ -1,5 +1,5 @@
 """Factory decorators"""
-from marquez.registry import _registry
+from microcosm.registry import _registry
 
 
 DEFAULTS = "_defaults"

@@ -1,12 +1,12 @@
 """Object Graph"""
 from contextlib import contextmanager
 
-from marquez.configuration import Configuration
-from marquez.errors import CyclicGraphError, LockedGraphError
-from marquez.decorators import get_defaults
-from marquez.loaders import load_from_python_file
-from marquez.metadata import Metadata
-from marquez.registry import _registry
+from microcosm.configuration import Configuration
+from microcosm.errors import CyclicGraphError, LockedGraphError
+from microcosm.decorators import get_defaults
+from microcosm.loaders import load_from_python_file
+from microcosm.metadata import Metadata
+from microcosm.registry import _registry
 
 
 RESERVED = object()

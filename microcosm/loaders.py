@@ -11,7 +11,7 @@ from os import environ
 
 from inflection import underscore
 
-from marquez.configuration import Configuration
+from microcosm.configuration import Configuration
 
 
 def get_config_filename(metadata):

@@ -5,12 +5,12 @@ from hamcrest import (
     is_,
 )
 
-from marquez.decorators import (
+from microcosm.decorators import (
     binding,
     defaults,
     get_defaults,
 )
-from marquez.registry import Registry
+from microcosm.registry import Registry
 
 
 def test_defaults():

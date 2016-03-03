@@ -2,7 +2,7 @@
 from itertools import chain
 from pkg_resources import iter_entry_points
 
-from marquez.errors import AlreadyBoundError, NotBoundError
+from microcosm.errors import AlreadyBoundError, NotBoundError
 
 
 class Registry(object):
@@ -20,7 +20,7 @@ class Registry(object):
             # NB: it's possible to have two entry points for the same name
             # (but in different distributions). This will cause unpredictable
             # behavior; don't do that.
-            for entry_point in iter_entry_points(group="marquez.factories")
+            for entry_point in iter_entry_points(group="microcosm.factories")
         }
 
     @property
