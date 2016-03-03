@@ -5,6 +5,8 @@ a fleet of such services, each performing a different function. Inevitably, thes
 will use common code and structure; this library provides a simple mechanism for constructing
 these shared components and wiring them together into services.
 
+[![Circle CI](https://circleci.com/gh/globality-corp/microcosm/tree/develop.svg?style=svg)](https://circleci.com/gh/globality-corp/microcosm/tree/develop)
+
 
 ## Terminology
 
@@ -24,29 +26,29 @@ these shared components and wiring them together into services.
  1. Define factory functions for `components`, attach them to a `binding`, and provide
     (optional) configuration `defaults`:
 
-        from marquez import defaults, binding
+        from microcosm.api import defaults, binding
 
         @binding("foo")
         @defaults(baz="value")
-        def create_foo(graph, config):
+        def create_foo(graph):
             return dict(
                 # factories can reference other components
                 bar=graph.bar,
                 # factories can reference configuration
-                baz=config.foo.baz,
+                baz=graph.config.foo.baz,
             )
 
         @binding("bar")
-        def create_bar(graph, config):
+        def create_bar(graph):
             return dict()
 
-    Factory functions have access to the `object graph` and the `config dict`. Default configuration
-    values, if provided, are pre-populated within the provided binding; these may be overridden from
-    data loaded from an external source.
+    Factory functions have access to the `object graph` and, through it, the `config dict`. Default
+    configuration values, if provided, are pre-populated within the provided binding; these may be
+    overridden from data loaded from an external source.
 
  2. Wire together the microservice by creating a new object graph along with service metadata:
 
-        from marquez import create_object_graph
+        from microcosm.api import create_object_graph
 
         graph = create_object_graph(
             name="myservice",
@@ -97,7 +99,8 @@ This library was influenced by the [pinject](https://github.com/google/pinject) 
 makes a few assumption that allow for a great deal of simplication:
 
  1. Microservices are small enough that simple string bindings suffice. Or, put another way,
-    conflicts between identically bound components are a non-concern.
+    conflicts between identically bound components are a non-concern and there is no need
+    for explicit scopes.
 
  2. Microservices use processes, not threads to scale. As such, thread synchronization is
     a non-goal.
