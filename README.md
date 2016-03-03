@@ -24,29 +24,29 @@ these shared components and wiring them together into services.
  1. Define factory functions for `components`, attach them to a `binding`, and provide
     (optional) configuration `defaults`:
 
-        from marquez import defaults, binding
+        from marquez.api import defaults, binding
 
         @binding("foo")
         @defaults(baz="value")
-        def create_foo(graph, config):
+        def create_foo(graph):
             return dict(
                 # factories can reference other components
                 bar=graph.bar,
                 # factories can reference configuration
-                baz=config.foo.baz,
+                baz=graph.config.foo.baz,
             )
 
         @binding("bar")
-        def create_bar(graph, config):
+        def create_bar(graph):
             return dict()
 
-    Factory functions have access to the `object graph` and the `config dict`. Default configuration
-    values, if provided, are pre-populated within the provided binding; these may be overridden from
-    data loaded from an external source.
+    Factory functions have access to the `object graph` and, through it, the `config dict`. Default
+    configuration values, if provided, are pre-populated within the provided binding; these may be
+    overridden from data loaded from an external source.
 
  2. Wire together the microservice by creating a new object graph along with service metadata:
 
-        from marquez import create_object_graph
+        from marquez.api import create_object_graph
 
         graph = create_object_graph(
             name="myservice",

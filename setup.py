@@ -14,7 +14,7 @@ setup(
     zip_safe=False,
     keywords="marquez",
     install_requires=[
-        "easydict>=1.6",
+        "inflection>=0.3.1",
     ],
     setup_requires=[
         "nose>=1.3.6",
@@ -22,6 +22,9 @@ setup(
     dependency_links=[
     ],
     entry_points={
+        "marquez.factories": [
+            "hello_world = marquez.example:create_hello_world"
+        ],
     },
     tests_require=[
         "coverage>=3.7.1",
