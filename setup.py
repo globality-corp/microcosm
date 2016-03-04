@@ -17,6 +17,7 @@ setup(
     keywords="microcosm",
     install_requires=[
         "inflection>=0.3.1",
+        "lazy>=1.2",
     ],
     setup_requires=[
         "nose>=1.3.6",
