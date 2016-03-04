@@ -2,7 +2,7 @@
 from setuptools import find_packages, setup
 
 project = "microcosm"
-version = "0.2.1"
+version = "0.3.0"
 
 setup(
     name=project,
@@ -17,6 +17,7 @@ setup(
     keywords="microcosm",
     install_requires=[
         "inflection>=0.3.1",
+        "lazy>=1.2",
     ],
     setup_requires=[
         "nose>=1.3.6",

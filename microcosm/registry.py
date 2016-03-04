@@ -2,6 +2,8 @@
 from itertools import chain
 from pkg_resources import iter_entry_points
 
+from lazy import lazy
+
 from microcosm.errors import AlreadyBoundError, NotBoundError
 
 
@@ -14,8 +16,10 @@ class Registry(object):
     """
     def __init__(self):
         self.factories = {}
-        # We need to load entry points up front in order to access their defaults
-        self.entry_points = {
+
+    @lazy
+    def entry_points(self):
+        return {
             entry_point.name: entry_point.load()
             # NB: it's possible to have two entry points for the same name
             # (but in different distributions). This will cause unpredictable
