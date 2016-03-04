@@ -6,6 +6,7 @@ from microcosm.errors import CyclicGraphError, LockedGraphError
 from microcosm.decorators import get_defaults
 from microcosm.loaders import load_from_python_file
 from microcosm.metadata import Metadata
+from microcosm.modules import ModuleFinder
 from microcosm.registry import _registry
 
 
@@ -50,6 +51,25 @@ class ObjectGraph(object):
 
         """
         self._locked = False
+
+    def export(self, package_name):
+        """
+        Export this object graph under the given package name.
+
+        Allows the graph's components to be accessible via an import statement thereby
+        making an object graph usable by code paths that don't have easy access to the
+        graph.
+
+        Usage:
+
+            from <package_name> import <component>
+
+        To avoid inconsistencies between the graph and the module, the graph will be locked
+        by this operation.
+
+        """
+        self.lock()
+        ModuleFinder.export(self, package_name)
 
     def __getattr__(self, key):
         """
