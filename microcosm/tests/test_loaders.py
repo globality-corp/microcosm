@@ -126,6 +126,17 @@ def test_load_from_environ():
     assert_that(config, is_(equal_to({"bar": "baz", "foo": {"this": "that"}})))
 
 
+def test_load_from_environ_multipart_name():
+    """
+    Return configuration from environment.
+
+    """
+    metadata = Metadata("foo-bar")
+    with envvar("FOO_BAR_BAZ", "blah"):
+        config = load_from_environ(metadata)
+    assert_that(config, is_(equal_to({"baz": "blah"})))
+
+
 def test_load_each():
     """
     Return the merged union of two loaders.

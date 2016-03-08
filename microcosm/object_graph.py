@@ -4,7 +4,7 @@ from contextlib import contextmanager
 from microcosm.configuration import Configuration
 from microcosm.errors import CyclicGraphError, LockedGraphError
 from microcosm.decorators import get_defaults
-from microcosm.loaders import load_from_python_file
+from microcosm.loaders import load_from_environ
 from microcosm.metadata import Metadata
 from microcosm.modules import ModuleFinder
 from microcosm.registry import _registry
@@ -121,7 +121,7 @@ class ObjectGraph(object):
         return component
 
 
-def create_object_graph(name, debug=False, testing=False, loader=load_from_python_file, registry=_registry):
+def create_object_graph(name, debug=False, testing=False, loader=load_from_environ, registry=_registry):
     """
     Create a new object graph.
 
