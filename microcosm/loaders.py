@@ -69,3 +69,37 @@ def load_from_python_file(metadata):
             if not key.startswith("_")
         }
     return _load_from_file(metadata, load_python_module)
+
+
+def load_from_environ(metadata, separator="_"):
+    """
+    Load configuration from environment variables.
+
+    Any environment variable prefixed with the metadata's name will be
+    used to recursively set dictionary keys, splitting on '_'.
+
+    """
+    config = Configuration()
+    for key, value in environ.items():
+        parts = key.lower().split(separator)
+        if parts[0] == metadata.name and len(parts) > 1:
+            dct = config
+            for index, part in enumerate(parts[1:-1]):
+                dct[part] = dict()
+                dct = dct[part]
+            dct[parts[-1]] = value
+    return config
+
+
+def load_each(*loaders):
+    """
+    Loader factory that combines a series of loaders.
+
+    """
+    def _load_each(metadata):
+        config = loaders[0](metadata)
+        for loader in loaders[1:]:
+            next_config = loader(metadata)
+            config.merge(next_config)
+        return config
+    return _load_each
