@@ -14,6 +14,8 @@ from hamcrest import (
 
 from microcosm.loaders import (
     get_config_filename,
+    load_each,
+    load_from_environ,
     load_from_json_file,
     load_from_python_file,
 )
@@ -59,7 +61,7 @@ def test_get_config_filename_not_set():
 
 def test_get_config_filename():
     """
-    If the envvar is not set, it is used as the filename.
+    If the envvar is set, it is used as the filename.
 
     """
     metadata = Metadata("foo-bar")
@@ -110,3 +112,44 @@ def test_load_from_python_file_not_set():
     metadata = Metadata("foo-bar")
     config = load_from_python_file(metadata)
     assert_that(config, is_(empty()))
+
+
+def test_load_from_environ():
+    """
+    Return configuration from environment.
+
+    """
+    metadata = Metadata("foo")
+    with envvar("FOO_BAR", "baz"):
+        with envvar("FOO_FOO_THIS", "that"):
+            config = load_from_environ(metadata)
+    assert_that(config, is_(equal_to({"bar": "baz", "foo": {"this": "that"}})))
+
+
+def test_load_from_environ_multipart_name():
+    """
+    Return configuration from environment.
+
+    """
+    metadata = Metadata("foo-bar")
+    with envvar("FOO_BAR_BAZ", "blah"):
+        config = load_from_environ(metadata)
+    assert_that(config, is_(equal_to({"baz": "blah"})))
+
+
+def test_load_each():
+    """
+    Return the merged union of two loaders.
+
+    """
+    metadata = Metadata("foo")
+    with configfile(dumps(dict(foo="bar"))) as configfile_:
+        with envvar("FOO_SETTINGS", configfile_.name):
+            with envvar("FOO_BAR", "baz"):
+                loader = load_each(load_from_json_file, load_from_environ)
+                config = loader(metadata)
+    assert_that(config, is_(equal_to({
+        "bar": "baz",
+        "foo": "bar",
+        "settings": configfile_.name
+    })))
