@@ -109,7 +109,10 @@ def load_from_environ(metadata):
             dct[key_part.lower()] = dict()
             dct = dct[key_part.lower()]
         # set the value for the final part
-        dct[key_parts[-1].lower()] = value
+        try:
+            dct[key_parts[-1].lower()] = loads(value)
+        except ValueError:
+            dct[key_parts[-1].lower()] = value
     return config
 
 
