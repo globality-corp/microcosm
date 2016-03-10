@@ -23,7 +23,8 @@ class Metadata(object):
         self.name = name
         self.debug = debug
         self.testing = testing
-        self.root_path = root_path or self.get_root_path(import_name or name)
+        self.import_name = import_name or self.name
+        self.root_path = root_path or self.get_root_path(self.import_name)
 
     def get_root_path(self, name):
         """

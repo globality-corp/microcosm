@@ -16,6 +16,7 @@ from microcosm.loaders import (
     get_config_filename,
     load_each,
     load_from_environ,
+    load_from_environ_as_json,
     load_from_json_file,
     load_from_python_file,
 )
@@ -124,6 +125,18 @@ def test_load_from_environ():
         with envvar("FOO_FOO_THIS", "that"):
             config = load_from_environ(metadata)
     assert_that(config, is_(equal_to({"bar": "baz", "foo": {"this": "that"}})))
+
+
+def test_load_from_environ_json():
+    """
+    Return json configuration from environment.
+
+    """
+    metadata = Metadata("foo")
+    with envvar("FOO_BAR", '["baz"]'):
+        with envvar("FOO_BAZ", 'true'):
+            config = load_from_environ_as_json(metadata)
+    assert_that(config, is_(equal_to({"bar": ["baz"], "baz": True})))
 
 
 def test_load_from_environ_multipart_name():
