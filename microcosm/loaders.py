@@ -71,12 +71,14 @@ def load_from_python_file(metadata):
     return _load_from_file(metadata, load_python_module)
 
 
-def load_from_environ(metadata):
+def _load_from_environ(metadata, value_func=None):
     """
     Load configuration from environment variables.
 
     Any environment variable prefixed with the metadata's name will be
     used to recursively set dictionary keys, splitting on '_'.
+
+    :param value_func: a mutator for the envvar's value (if any)
 
     """
     # We'll match the ennvar name against the metadata's name. The ennvar
@@ -109,8 +111,24 @@ def load_from_environ(metadata):
             dct[key_part.lower()] = dict()
             dct = dct[key_part.lower()]
         # set the value for the final part
-        dct[key_parts[-1].lower()] = value
+        dct[key_parts[-1].lower()] = value_func(value) if value_func else value
     return config
+
+
+def load_from_environ(metadata):
+    """
+    Load configuration from environment variables.
+
+    """
+    return _load_from_environ(metadata)
+
+
+def load_from_environ_as_json(metadata):
+    """
+    Load configuration from environment variables as JSON
+
+    """
+    return _load_from_environ(metadata, value_func=loads)
 
 
 def load_each(*loaders):
