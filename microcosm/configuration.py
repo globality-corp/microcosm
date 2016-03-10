@@ -42,7 +42,7 @@ class Configuration(dict):
             dct.update(**kwargs)
 
         for key, value in dct.items():
-            if isinstance(value, dict) and isinstance(self[key], Configuration):
+            if isinstance(value, dict) and isinstance(self.get(key), Configuration):
                 # recursively merge
                 self[key].merge(value)
             else:

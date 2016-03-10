@@ -131,6 +131,19 @@ def load_from_environ_as_json(metadata):
     return _load_from_environ(metadata, value_func=loads)
 
 
+def load_from_dict(dct=None, **kwargs):
+    """
+    Load configuration from a dictionary.
+
+    """
+    dct = dct or dict()
+    dct.update(kwargs)
+
+    def _load_from_dict(metadata):
+        return Configuration(dct)
+    return _load_from_dict
+
+
 def load_each(*loaders):
     """
     Loader factory that combines a series of loaders.
