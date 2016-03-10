@@ -120,6 +120,8 @@ class ObjectGraph(object):
         self._components[key] = component
         return component
 
+    __getitem__ = __getattr__
+
 
 def create_object_graph(name,
                         debug=False,
