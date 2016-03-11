@@ -55,3 +55,26 @@ def test_merge():
         dict(key=dict()),
     )
     assert_that(config.key, is_(equal_to(dict())))
+
+
+def test_merge_lists():
+    """
+    Configuration merges lists but not tuples.
+
+    """
+    config = Configuration(
+        lst1=[1, 2],
+        lst2=[1, 2],
+        tpl1=(1, 2),
+        tpl2=(1, 2),
+    )
+    config.merge(
+        lst1=[3, 4],
+        lst2=(3, 4),
+        tpl1=(3, 4),
+        tpl2=[3, 4],
+    )
+    assert_that(config["lst1"], is_(equal_to([1, 2, 3, 4])))
+    assert_that(config["lst2"], is_(equal_to((3, 4))))
+    assert_that(config["tpl1"], is_(equal_to((3, 4))))
+    assert_that(config["tpl2"], is_(equal_to([3, 4])))
