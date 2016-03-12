@@ -9,4 +9,6 @@
 
 # Python project settings
 --ignore-dir=.eggs/
+--ignore-dir=.tox/
 --ignore-dir=build/
+--ignore-dir=cover/

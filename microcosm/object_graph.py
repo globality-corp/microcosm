@@ -44,6 +44,7 @@ class ObjectGraph(object):
 
         """
         self._locked = True
+        return self
 
     def unlock(self):
         """
@@ -51,6 +52,7 @@ class ObjectGraph(object):
 
         """
         self._locked = False
+        return self
 
     def export(self, package_name):
         """
@@ -84,11 +86,11 @@ class ObjectGraph(object):
         try:
             component = self._components[key]
             if component is RESERVED:
-                raise CyclicGraphError()
+                raise CyclicGraphError(key)
             return component
         except KeyError:
             if self._locked:
-                raise LockedGraphError()
+                raise LockedGraphError(key)
             return self._resolve_key(key)
 
     @contextmanager
