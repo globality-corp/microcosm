@@ -95,23 +95,28 @@ def _load_from_environ(metadata, value_func=None):
 
     prefix = metadata.name.upper().replace("-", "_").split("_")
 
-    def matches_key(key_parts):
+    def matches_app(key_parts):
         return len(key_parts) > len(prefix) and key_parts[:len(prefix)] == prefix
+
+    def assign_value(dct, key, value):
+        dct[key.lower()] = value_func(value) if value_func else value
+
+    def process_env_var(key_parts, value, config):
+        if not matches_app(key_parts):
+            return
+        dct = config
+        # walk the path specified by the env var to put the value in the right
+        # place in the config
+        for key_part in key_parts[len(prefix):-1]:
+            if key_part.lower() not in dct:
+                dct[key_part.lower()] = dict()
+            dct = dct[key_part.lower()]
+        assign_value(dct, key_parts[-1], value)
 
     config = Configuration()
     for key, value in environ.items():
         key_parts = key.split("_")
-        if not matches_key(key_parts):
-            continue
-
-        dct = config
-        # for each part before the last
-        for key_part in key_parts[len(prefix):-1]:
-            # build up the nested dictionary structure
-            dct[key_part.lower()] = dict()
-            dct = dct[key_part.lower()]
-        # set the value for the final part
-        dct[key_parts[-1].lower()] = value_func(value) if value_func else value
+        process_env_var(key_parts, value, config)
     return config
 
 
