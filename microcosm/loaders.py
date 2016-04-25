@@ -60,15 +60,17 @@ def load_from_python_file(metadata):
     named after the service of the form FOO_SETTINGS.
 
     """
-    def load_python_module(data):
-        module = new_module("magic")
-        exec(data, module.__dict__, module.__dict__)
-        return {
-            key: value
-            for key, value in module.__dict__.items()
-            if not key.startswith("_")
-        }
-    return _load_from_file(metadata, load_python_module)
+    return _load_from_file(metadata, _load_python_module)
+
+
+def _load_python_module(data):
+    module = new_module("magic")
+    exec(data, module.__dict__, module.__dict__)
+    return {
+        key: value
+        for key, value in module.__dict__.items()
+        if not key.startswith("_")
+    }
 
 
 def _load_from_environ(metadata, value_func=None):

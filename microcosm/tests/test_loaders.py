@@ -44,7 +44,7 @@ def configfile(data):
     Temporarily create a temporary file.
 
     """
-    configfile_ = NamedTemporaryFile()
+    configfile_ = NamedTemporaryFile(mode='w+')
     configfile_.write(data)
     configfile_.flush()
     yield configfile_
