@@ -127,6 +127,23 @@ def test_load_from_environ():
     assert_that(config, is_(equal_to({"bar": "baz", "foo": {"this": "that"}})))
 
 
+def test_load_from_environ_double_underscore():
+    """
+    Return configuration from environment.
+
+    """
+    metadata = Metadata("foo")
+    with envvar("FOO_BAR", "baz"):
+        with envvar("FOO__BAZ", "bar"):
+            with envvar("FOO__BAR_BAZ__THIS", "that"):
+                config = load_from_environ(metadata)
+    assert_that(config, is_(equal_to({
+        "bar": "baz",
+        "baz": "bar",
+        "bar_baz": {"this": "that"}}
+    )))
+
+
 def test_load_multiple_values_for_on_componentfrom_environ():
     """
     Return configuration from environment.
