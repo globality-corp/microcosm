@@ -78,7 +78,7 @@ def _load_from_environ(metadata, value_func=None):
     Load configuration from environment variables.
 
     Any environment variable prefixed with the metadata's name will be
-    used to recursively set dictionary keys, splitting on '_'.
+    used to recursively set dictionary keys, splitting on '_' or '__'.
 
     :param value_func: a mutator for the envvar's value (if any)
 
@@ -117,7 +117,8 @@ def _load_from_environ(metadata, value_func=None):
 
     config = Configuration()
     for key, value in environ.items():
-        key_parts = key.split("_")
+        separator = "__" if "__" in key else "_"
+        key_parts = key.split(separator)
         process_env_var(key_parts, value, config)
     return config
 
