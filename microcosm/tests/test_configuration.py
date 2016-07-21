@@ -1,11 +1,13 @@
 """Tests for configuration"""
 from hamcrest import (
     assert_that,
+    calling,
     equal_to,
     has_entry,
     has_property,
     instance_of,
     is_,
+    raises,
 )
 
 from microcosm.configuration import Configuration
@@ -55,6 +57,32 @@ def test_merge():
         dict(key=dict()),
     )
     assert_that(config.key, is_(equal_to(dict())))
+
+
+def test_dont_merge():
+    """
+    Configuration support disabling recursive merging
+
+    """
+    config = Configuration(
+        nested=dict(
+            __merge__=False,
+            nested_key="nested_value",
+            other_key="initial_value",
+        )
+    )
+    config.merge(
+        key="value",
+        nested=dict(
+            other_key="new_value",
+        ),
+    )
+    assert_that(config.key, is_(equal_to("value")))
+    assert_that(
+        calling(getattr).with_args(config.nested, "nested_key"),
+        raises(AttributeError),
+    )
+    assert_that(config.nested.other_key, is_(equal_to("new_value")))
 
 
 def test_merge_lists():
