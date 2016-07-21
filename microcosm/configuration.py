@@ -48,7 +48,11 @@ class Configuration(dict):
             dct.update(**kwargs)
 
         for key, value in dct.items():
-            if isinstance(value, dict) and isinstance(self.get(key), Configuration):
+            if all((
+                    isinstance(value, dict),
+                    isinstance(self.get(key), Configuration),
+                    getattr(self.get(key), "__merge__", True),
+            )):
                 # recursively merge
                 self[key].merge(value)
             elif isinstance(value, list) and isinstance(self.get(key), list):
