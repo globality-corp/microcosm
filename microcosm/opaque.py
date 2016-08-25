@@ -1,4 +1,3 @@
-from contextlib import contextmanager
 from types import MethodType
 
 from contextdecorator import ContextDecorator
@@ -72,6 +71,7 @@ def _make_opaque_data(opaque):
         def __exit__(self, *exc):
             opaque.data_func = opaque._default_data_func
     return OpaqueData
+
 
 @binding("opaque")
 def configure_opaque(graph):
