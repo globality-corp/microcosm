@@ -2,8 +2,11 @@
 Configuration loading
 
 A configuration loader is any function that accepts `Metadata` and
-returns a `Configuration` object. Configuration might be loaded
-from a file, from environment variables, or from an external service.
+returns a `Configuration` object or equivalent dict.
+
+Configuration might be loaded from a file, from environment variables,
+or from an external service.
+
 """
 from imp import new_module
 from json import loads
@@ -12,6 +15,38 @@ from os import environ
 from inflection import underscore
 
 from microcosm.configuration import Configuration
+
+
+def expand_config(dct,
+                  separator='.',
+                  skip_to=0,
+                  key_func=lambda key: key.lower(),
+                  key_parts_filter=lambda key_parts: True,
+                  value_func=lambda value: value):
+    """
+    Expand a dictionary recursively by splitting keys along the separator.
+
+    :param dct: a non-recursive dictionary
+    :param separator: a separator charactor for splitting dictionary keys
+    :param skip_to: index to start splitting keys on; can be used to skip over a key prefix
+    :param key_func: a key mapping function
+    :param key_parts_filter: a filter function for excluding keys
+    :param value_func: a value mapping func
+
+    """
+    config = {}
+
+    for key, value in dct.items():
+        key_separator = separator(key) if callable(separator) else separator
+        key_parts = key.split(key_separator)
+        if not key_parts_filter(key_parts):
+            continue
+        key_config = config
+        for key_part in key_parts[skip_to:-1]:
+            key_config = key_config.setdefault(key_func(key_part), dict())
+        key_config[key_func(key_parts[-1])] = value_func(value)
+
+    return config
 
 
 def get_config_filename(metadata):
@@ -97,30 +132,13 @@ def _load_from_environ(metadata, value_func=None):
 
     prefix = metadata.name.upper().replace("-", "_").split("_")
 
-    def matches_app(key_parts):
-        return len(key_parts) > len(prefix) and key_parts[:len(prefix)] == prefix
-
-    def assign_value(dct, key, value):
-        dct[key.lower()] = value_func(value) if value_func else value
-
-    def process_env_var(key_parts, value, config):
-        if not matches_app(key_parts):
-            return
-        dct = config
-        # walk the path specified by the env var to put the value in the right
-        # place in the config
-        for key_part in key_parts[len(prefix):-1]:
-            if key_part.lower() not in dct:
-                dct[key_part.lower()] = dict()
-            dct = dct[key_part.lower()]
-        assign_value(dct, key_parts[-1], value)
-
-    config = Configuration()
-    for key, value in environ.items():
-        separator = "__" if "__" in key else "_"
-        key_parts = key.split(separator)
-        process_env_var(key_parts, value, config)
-    return config
+    return expand_config(
+        environ,
+        separator=lambda key: "__" if "__" in key else "_",
+        skip_to=len(prefix),
+        key_parts_filter=lambda key_parts: len(key_parts) > len(prefix) and key_parts[:len(prefix)] == prefix,
+        value_func=lambda value: value_func(value) if value_func else value,
+    )
 
 
 def load_from_environ(metadata):
