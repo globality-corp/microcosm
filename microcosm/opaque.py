@@ -1,11 +1,12 @@
-from types import MethodType
-
 from contextdecorator import ContextDecorator
+from collections import MutableMapping
+from copy import deepcopy
+from types import MethodType
 
 from microcosm.api import binding
 
 
-class Opaque(object):
+class Opaque(MutableMapping):
     """
     The Opaque collaborator and its assocaited context manager are extremely useful for
     instantiating context specific data during transaction processing. Example:
@@ -38,38 +39,47 @@ class Opaque(object):
     Note: opaque.opaque_data may also be used as a decorator.
 
     """
-    def __init__(self):
-        self.opaque_data = _make_opaque_data(self)
+    def __init__(self, *args, **kwargs):
+        self._store = dict()
+        self.update(dict(*args, **kwargs))
+        self.bind = _make_bind(self)
+
+    def __getitem__(self, key):
+        return self._store[key]
+
+    def __setitem__(self, key, value):
+        self._store[key] = value
+
+    def __delitem__(self, key):
+        del self._store[key]
+
+    def __iter__(self):
+        return iter(self._store)
+
+    def __len__(self):
+        return len(self._store)
 
     def _default_data_func(self):
         return {}
 
-    def data_func(self):
-        """
-        Using the opaque_data context manager in this class, you can override
-        the behavior of this function for certain contexts, i.e. in a flask
-        request context or in the context of a daemon processing a message.
-
-        Other components which use the `Opaque` collabortor can take advantage
-        of this by calling `Opaque.opaque_data_func`, which when used in
-        combination with the opaque_data context_manager, can be overriden with
-        context-specific behavior.
-        """
-        return {}
+    def as_dict(self):
+        return self._store
 
 
-def _make_opaque_data(opaque):
+def _make_bind(opaque):
     class OpaqueData(ContextDecorator):
         def __init__(self, opaque_data_func, *args, **kwargs):
+            self.original_store = deepcopy(opaque._store)
+
             def context_specific_data_func(self):
                 return opaque_data_func(*args, **kwargs)
-            self.context_specific_data_func = context_specific_data_func
+            self.context_specific_data_func = MethodType(context_specific_data_func, self)
 
         def __enter__(self):
-            opaque.data_func = MethodType(self.context_specific_data_func, opaque)
+            opaque.update(self.context_specific_data_func())
 
         def __exit__(self, *exc):
-            opaque.data_func = opaque._default_data_func
+            opaque._store = self.original_store
     return OpaqueData
 
 
