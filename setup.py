@@ -2,7 +2,7 @@
 from setuptools import find_packages, setup
 
 project = "microcosm"
-version = "0.11.0"
+version = "0.12.0"
 
 setup(
     name=project,
@@ -16,6 +16,7 @@ setup(
     zip_safe=False,
     keywords="microcosm",
     install_requires=[
+        "contextdecorator>=0.10.0",
         "inflection>=0.3.1",
         "lazy>=1.2",
     ],
