@@ -59,9 +59,6 @@ class Opaque(MutableMapping):
     def __len__(self):
         return len(self._store)
 
-    def _default_data_func(self):
-        return {}
-
     def as_dict(self):
         return self._store
 
@@ -69,13 +66,14 @@ class Opaque(MutableMapping):
 def _make_bind(opaque):
     class OpaqueData(ContextDecorator):
         def __init__(self, opaque_data_func, *args, **kwargs):
-            self.original_store = deepcopy(opaque._store)
 
             def context_specific_data_func(self):
                 return opaque_data_func(*args, **kwargs)
+
             self.context_specific_data_func = MethodType(context_specific_data_func, self)
 
         def __enter__(self):
+            self.original_store = deepcopy(opaque._store)
             opaque.update(self.context_specific_data_func())
 
         def __exit__(self, *exc):
