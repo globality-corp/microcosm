@@ -13,6 +13,7 @@ from hamcrest import (
 )
 
 from microcosm.loaders import (
+    expand_config,
     get_config_filename,
     load_each,
     load_from_environ,
@@ -48,6 +49,32 @@ def configfile(data):
     configfile_.write(data)
     configfile_.flush()
     yield configfile_
+
+
+def test_expand_config():
+    """
+    Configuration expansion should work.
+
+    """
+    assert_that(
+        expand_config(
+            {
+                "prefix.foo": "bar",
+                "prefix.BAR.baz": lambda: "foo",
+                "this": "that",
+            },
+            key_parts_filter=lambda key_parts: key_parts[0] == "prefix",
+            skip_to=1,
+        ),
+        is_(equal_to(
+            {
+                "foo": "bar",
+                "bar": {
+                    "baz": "foo",
+                },
+            },
+        )),
+    )
 
 
 def test_get_config_filename_not_set():
