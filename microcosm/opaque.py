@@ -8,35 +8,14 @@ from microcosm.api import binding
 
 class Opaque(MutableMapping):
     """
-    The Opaque collaborator and its assocaited context manager are extremely useful for
-    instantiating context specific data during transaction processing. Example:
+    The Opaque collaborator and its associated context manager/decorator are
+    useful for instantiating context specific data during transaction processing.
+    Opaque.bind(func, *args, **kwargs) can be used as both a decorator and a
+    context manager to set opaque to a dict-like object updated with the dictionary
+    returned by func(*args, **kwargs) whose value will be reset after the decorator/context
+    manager exits.
 
-        from microcosm.opaque import Opaque
-
-        # set up
-        def special_opaque_data(some, stuff):
-            return "{} {}".format(some, stuff)
-        some = "some"
-        stuff = "stuff"
-
-        opaque = Opaque()
-
-        # usage
-        print opaque.opaque_data_func()
-
-        with opaque.opaque_data(special_opaque_data, some, stuff):
-            print opaque.opaque_data_func()
-
-        print opaque.opaque_data_func()
-
-    Outputs:
-
-        {}
-        some stuff
-        {}
-
-
-    Note: opaque.opaque_data may also be used as a decorator.
+    See tests for usage examples.
 
     """
     def __init__(self, *args, **kwargs):
