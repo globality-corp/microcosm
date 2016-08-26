@@ -22,7 +22,7 @@ def expand_config(dct,
                   skip_to=0,
                   key_func=lambda key: key.lower(),
                   key_parts_filter=lambda key_parts: True,
-                  value_func=lambda value: value() if callable(value) else value):
+                  value_func=lambda value: value):
     """
     Expand a dictionary recursively by splitting keys along the separator.
 
