@@ -1,14 +1,23 @@
+# CircleCI Configuration file
+
+machine:
+  python:
+      version: 2.7.11
+
 general:
   artifacts:
      - "dist"
      - "cover"
+
 dependencies:
   override:
     - pip install tox tox-pyenv
-    - pyenv local 2.7.9 3.5.0  # Should correspond to pre-installed Python versions on CircleCI
+    - pyenv local 2.7.11 3.5.1  # Should correspond to pre-installed Python versions on CircleCI
+
 test:
   override:
      - tox
+
 deployment:
   pypi:
     tag: /[0-9]+(\.[0-9]+)*/
