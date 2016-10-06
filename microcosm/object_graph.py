@@ -1,9 +1,13 @@
-"""Object Graph"""
+"""
+Object Graph
+
+"""
 from contextlib import contextmanager
 
 from microcosm.configuration import Configuration
 from microcosm.errors import CyclicGraphError, LockedGraphError
 from microcosm.decorators import get_defaults
+from microcosm.hooks import invoke_resolve_hook
 from microcosm.loaders import load_from_environ
 from microcosm.metadata import Metadata
 from microcosm.modules import ModuleFinder
@@ -118,6 +122,7 @@ class ObjectGraph(object):
         with self._reserve(key):
             factory = self._registry.resolve(key)
             component = factory(self)
+            invoke_resolve_hook(component)
 
         self._components[key] = component
         return component
