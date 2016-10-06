@@ -54,8 +54,8 @@ def _invoke_hook(hook_name, target):
     except AttributeError:
         # no hook defined
         pass
-    except ValueError:
-        # hook not properly defined (might be a MagicMock?)
+    except (TypeError, ValueError):
+        # hook not properly defined (might be a mock)
         pass
 
 
