@@ -1,4 +1,7 @@
-"""Registry of component factories"""
+"""
+Registry of component factories.
+
+"""
 from itertools import chain
 from pkg_resources import iter_entry_points
 

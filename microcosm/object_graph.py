@@ -11,6 +11,7 @@ from microcosm.hooks import invoke_resolve_hook
 from microcosm.loaders import load_from_environ
 from microcosm.metadata import Metadata
 from microcosm.modules import ModuleFinder
+from microcosm.profile import NoopProfiler
 from microcosm.registry import _registry
 
 
@@ -25,11 +26,12 @@ class ObjectGraph(object):
     components forms a directed acyclic graph.
 
     """
-    def __init__(self, metadata, config, registry):
+    def __init__(self, metadata, config, registry, profiler):
         self.metadata = metadata
         self.config = config
         self._locked = False
         self._registry = registry
+        self._profiler = profiler
         self._components = {}
 
     def use(self, *keys):
@@ -121,7 +123,8 @@ class ObjectGraph(object):
         """
         with self._reserve(key):
             factory = self._registry.resolve(key)
-            component = factory(self)
+            with self._profiler(key):
+                component = factory(self)
             invoke_resolve_hook(component)
 
         self._components[key] = component
@@ -136,7 +139,8 @@ def create_object_graph(name,
                         import_name=None,
                         root_path=None,
                         loader=load_from_environ,
-                        registry=_registry):
+                        registry=_registry,
+                        profiler=None):
     """
     Create a new object graph.
 
@@ -164,4 +168,5 @@ def create_object_graph(name,
         metadata=metadata,
         config=config,
         registry=registry,
+        profiler=profiler or NoopProfiler(),
     )
