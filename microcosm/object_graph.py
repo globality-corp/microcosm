@@ -1,9 +1,15 @@
 """
-Object Graph
+The object graph is the core unit of microcosm-based applications.
+
+Object graphs wire together independently defined `components` using a set
+of factory functions and application configuration. Components are bound
+to the graph lazily (or via `graph.use()`) and are cached for reuse.
 
 """
 from contextlib import contextmanager
+from six import string_types
 
+from microcosm.caching import create_cache
 from microcosm.configuration import Configuration
 from microcosm.errors import CyclicGraphError, LockedGraphError
 from microcosm.decorators import get_defaults
@@ -26,13 +32,13 @@ class ObjectGraph(object):
     components forms a directed acyclic graph.
 
     """
-    def __init__(self, metadata, config, registry, profiler):
+    def __init__(self, metadata, config, registry, profiler, cache):
         self.metadata = metadata
         self.config = config
         self._locked = False
         self._registry = registry
         self._profiler = profiler
-        self._components = {}
+        self._cache = cache
 
     def use(self, *keys):
         """
@@ -90,7 +96,7 @@ class ObjectGraph(object):
 
         """
         try:
-            component = self._components[key]
+            component = self._cache[key]
             if component is RESERVED:
                 raise CyclicGraphError(key)
             return component
@@ -107,11 +113,11 @@ class ObjectGraph(object):
         Protects against cycles.
 
         """
-        self._components[key] = RESERVED
+        self._cache[key] = RESERVED
         try:
             yield
         finally:
-            del self._components[key]
+            del self._cache[key]
 
     def _resolve_key(self, key):
         """
@@ -127,7 +133,7 @@ class ObjectGraph(object):
                 component = factory(self)
             invoke_resolve_hook(component)
 
-        self._components[key] = component
+        self._cache[key] = component
         return component
 
     __getitem__ = __getattr__
@@ -140,7 +146,8 @@ def create_object_graph(name,
                         root_path=None,
                         loader=load_from_environ,
                         registry=_registry,
-                        profiler=None):
+                        profiler=None,
+                        cache=None):
     """
     Create a new object graph.
 
@@ -149,6 +156,7 @@ def create_object_graph(name,
     :param testing: is unit testing enabled?
     :param loader: the configuration loader to use
     :param registry: the registry to use (defaults to the global)
+
     """
     metadata = Metadata(
         name=name,
@@ -164,9 +172,16 @@ def create_object_graph(name,
     })
     config.merge(loader(metadata))
 
+    if profiler is None:
+        profiler = NoopProfiler()
+
+    if cache is None or isinstance(cache, string_types):
+        cache = create_cache(cache)
+
     return ObjectGraph(
         metadata=metadata,
         config=config,
         registry=registry,
-        profiler=profiler or NoopProfiler(),
+        profiler=profiler,
+        cache=cache,
     )

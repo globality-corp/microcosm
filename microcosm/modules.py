@@ -53,7 +53,7 @@ class ModuleLoader(object):
         sys.modules[fullname] = module
 
         if fullname == self.package_name:
-            module.__dict__.update(self.graph._components)
+            module.__dict__.update(self.graph._cache)
 
         return module
 
