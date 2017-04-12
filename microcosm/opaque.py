@@ -7,8 +7,6 @@ from collections import MutableMapping
 from copy import deepcopy
 from types import MethodType
 
-from microcosm.api import binding
-
 
 def _make_initializer(opaque):
 
@@ -77,6 +75,5 @@ class Opaque(MutableMapping):
         return self._store
 
 
-@binding("opaque")
 def configure_opaque(graph):
     return Opaque(graph.config.opaque)

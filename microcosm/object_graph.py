@@ -105,6 +105,11 @@ class ObjectGraph(object):
                 raise LockedGraphError(key)
             return self._resolve_key(key)
 
+    def __setattr__(self, key, value):
+        if not key.startswith("_") and key not in ("metadata", "config"):
+            raise Exception("Cannot setattr on ObjectGraph for key: {}".format(key))
+        super(ObjectGraph, self).__setattr__(key, value)
+
     @contextmanager
     def _reserve(self, key):
         """

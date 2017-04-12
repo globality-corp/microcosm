@@ -2,7 +2,7 @@
 from setuptools import find_packages, setup
 
 project = "microcosm"
-version = "0.16.0"
+version = "0.17.0"
 
 setup(
     name=project,
@@ -27,7 +27,8 @@ setup(
     ],
     entry_points={
         "microcosm.factories": [
-            "hello_world = microcosm.example:create_hello_world"
+            "hello_world = microcosm.example:create_hello_world",
+            "opaque = microcosm.opaque:configure_opaque",
         ],
     },
     tests_require=[
