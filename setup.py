@@ -27,7 +27,8 @@ setup(
     ],
     entry_points={
         "microcosm.factories": [
-            "hello_world = microcosm.example:create_hello_world"
+            "hello_world = microcosm.example:create_hello_world",
+            "opaque = microcosm.opaque:configure_opaque",
         ],
     },
     tests_require=[

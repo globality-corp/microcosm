@@ -8,6 +8,7 @@ Alternate cache implementations can be used to speed up performance
 
 """
 from abc import ABCMeta, abstractmethod
+from collections import defaultdict
 from six import add_metaclass
 
 
@@ -17,7 +18,6 @@ class Cache(object):
     A cache uses the basic dictionary interface and defines a name.
 
     """
-
     @classmethod
     def name(self):
         raise NotImplementedError
@@ -61,20 +61,23 @@ class ProcessCache(Cache):
     time (at the expense of a "clean slate" testing context).
 
     """
-    CACHE = dict()
+    CACHES = defaultdict(dict)
 
     @classmethod
     def name(self):
         return "process"
 
+    def __init__(self, scope="default"):
+        self.scope = scope
+
     def __getitem__(self, name):
-        return ProcessCache.CACHE[name]
+        return ProcessCache.CACHES[self.scope][name]
 
     def __setitem__(self, name, component):
-        ProcessCache.CACHE[name] = component
+        ProcessCache.CACHES[self.scope][name] = component
 
     def __delitem__(self, name):
-        del ProcessCache.CACHE[name]
+        del ProcessCache.CACHES[self.scope][name]
 
 
 def create_cache(name):
