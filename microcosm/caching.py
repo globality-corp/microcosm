@@ -23,6 +23,10 @@ class Cache(object):
         raise NotImplementedError
 
     @abstractmethod
+    def __contains__(self, name):
+        pass
+
+    @abstractmethod
     def __getitem__(self, name):
         pass
 
@@ -69,6 +73,10 @@ class ProcessCache(Cache):
 
     def __init__(self, scope="default"):
         self.scope = scope
+
+    @abstractmethod
+    def __contains__(self, name):
+        return name in ProcessCache.CACHES[self.scope]
 
     def __getitem__(self, name):
         return ProcessCache.CACHES[self.scope][name]

@@ -50,6 +50,18 @@ class ObjectGraph(object):
             for key in keys
         ]
 
+    def assign(self, key, value):
+        """
+        Explicitly assign a graph binding to a value.
+
+        In general, graph values should only be derived from registered factories
+        and the graph should not be assigned to; however, there can be exceptions including
+        testing and "virtual" bindings, so assign can be used when circumventing setattr.
+
+        """
+        self._cache[key] = value
+        return value
+
     def lock(self):
         """
         Lock the graph so that new components cannot be created.
@@ -118,7 +130,7 @@ class ObjectGraph(object):
         Protects against cycles.
 
         """
-        self._cache[key] = RESERVED
+        self.assign(key, RESERVED)
         try:
             yield
         finally:
@@ -138,8 +150,7 @@ class ObjectGraph(object):
                 component = factory(self)
             invoke_resolve_hook(component)
 
-        self._cache[key] = component
-        return component
+        return self.assign(key, component)
 
     __getitem__ = __getattr__
 
