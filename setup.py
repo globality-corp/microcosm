@@ -2,7 +2,7 @@
 from setuptools import find_packages, setup
 
 project = "microcosm"
-version = "0.17.1"
+version = "0.17.2"
 
 setup(
     name=project,
