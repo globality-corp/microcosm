@@ -74,7 +74,6 @@ class ProcessCache(Cache):
     def __init__(self, scope="default"):
         self.scope = scope
 
-    @abstractmethod
     def __contains__(self, name):
         return name in ProcessCache.CACHES[self.scope]
 
