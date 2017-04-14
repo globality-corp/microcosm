@@ -1,4 +1,7 @@
-"""Service metadata"""
+"""
+Service metadata
+
+"""
 from os.path import abspath, dirname, join
 from sys import modules
 

@@ -16,7 +16,6 @@ from microcosm.decorators import get_defaults
 from microcosm.hooks import invoke_resolve_hook
 from microcosm.loaders import load_from_environ
 from microcosm.metadata import Metadata
-from microcosm.modules import ModuleFinder
 from microcosm.profile import NoopProfiler
 from microcosm.registry import _registry
 
@@ -77,25 +76,6 @@ class ObjectGraph(object):
         """
         self._locked = False
         return self
-
-    def export(self, package_name):
-        """
-        Export this object graph under the given package name.
-
-        Allows the graph's components to be accessible via an import statement thereby
-        making an object graph usable by code paths that don't have easy access to the
-        graph.
-
-        Usage:
-
-            from <package_name> import <component>
-
-        To avoid inconsistencies between the graph and the module, the graph will be locked
-        by this operation.
-
-        """
-        self.lock()
-        ModuleFinder.export(self, package_name)
 
     def __getattr__(self, key):
         """
