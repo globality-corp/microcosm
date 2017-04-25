@@ -1,6 +1,22 @@
 """
 Opaque context data for communicating between service layers.
 
+The `graph.opaque` value is a dictionary-like object that can contain arbitrary data.
+Within different kinds of application logic, this value may be populated with different
+kinds of context, notably:
+
+ -  An input web request might extract values from request HTTP headers (see `microcosm-flask`)
+ -  A pubsub framework might extract values from inbound message metadata (see `microcosm-pubsub`)
+
+Similarly, different layers of an application may use this data in different ways:
+
+ -  A logging decoratory might automatically log all opaque values (see `microcosm-logging`)
+ -  A pubsub framework might insert opaque values into new messages (see `microcosm-pubsub`)
+ -  An outbound web request might insert opaque values as HTTP headers
+
+Combining opaque data across an entire fleet of services allows for consistent tracing and
+easier debugging of distributed operations.
+
 """
 from contextdecorator import ContextDecorator
 from collections import MutableMapping
