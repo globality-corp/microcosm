@@ -8,7 +8,6 @@ Configuration might be loaded from a file, from environment variables,
 or from an external service.
 
 """
-from imp import new_module
 from json import loads
 from os import environ
 
@@ -85,27 +84,6 @@ def load_from_json_file(metadata):
 
     """
     return _load_from_file(metadata, loads)
-
-
-def load_from_python_file(metadata):
-    """
-    Load configuration from a Python file.
-
-    The file path is derived from an environment variable
-    named after the service of the form FOO_SETTINGS.
-
-    """
-    return _load_from_file(metadata, _load_python_module)
-
-
-def _load_python_module(data):
-    module = new_module("magic")
-    exec(data, module.__dict__, module.__dict__)
-    return {
-        key: value
-        for key, value in module.__dict__.items()
-        if not key.startswith("_")
-    }
 
 
 def _load_from_environ(metadata, value_func=None):

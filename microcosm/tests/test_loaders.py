@@ -1,4 +1,7 @@
-"""Configuration loading tests"""
+"""
+Configuration loading tests
+
+"""
 from contextlib import contextmanager
 from json import dumps
 from os import environ
@@ -19,7 +22,6 @@ from microcosm.loaders import (
     load_from_environ,
     load_from_environ_as_json,
     load_from_json_file,
-    load_from_python_file,
 )
 from microcosm.metadata import Metadata
 
@@ -118,28 +120,6 @@ def test_load_from_json_file_not_set():
     """
     metadata = Metadata("foo-bar")
     config = load_from_json_file(metadata)
-    assert_that(config, is_(empty()))
-
-
-def test_load_from_python_file():
-    """
-    Return configuration from a python file.
-
-    """
-    metadata = Metadata("foo-bar")
-    with configfile("foo='bar'") as configfile_:
-        with envvar("FOO_BAR_SETTINGS", configfile_.name):
-            config = load_from_python_file(metadata)
-            assert_that(config.foo, is_(equal_to("bar")))
-
-
-def test_load_from_python_file_not_set():
-    """
-    Return empty configuration if python file is not defined.
-
-    """
-    metadata = Metadata("foo-bar")
-    config = load_from_python_file(metadata)
     assert_that(config, is_(empty()))
 
 

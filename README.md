@@ -66,7 +66,7 @@ these shared components and wiring them together into services.
 
  3. Reference any `binding` in the `object graph` to access the corresponding `component`:
 
-        print graph.foo
+        print(graph.foo)
 
     Components are initialized *lazily*. In this example, the first time `graph.foo` is accessed,
     the bound factory (`create_foo()`) is automatically invoked. Since this factory in turn
