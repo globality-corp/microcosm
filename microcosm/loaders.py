@@ -18,7 +18,6 @@ from microcosm.configuration import Configuration
 
 def expand_config(dct,
                   separator='.',
-                  skip_to=0,
                   key_func=lambda key: key.lower(),
                   key_parts_filter=lambda key_parts: True,
                   value_func=lambda value: value):
@@ -27,7 +26,6 @@ def expand_config(dct,
 
     :param dct: a non-recursive dictionary
     :param separator: a separator charactor for splitting dictionary keys
-    :param skip_to: index to start splitting keys on; can be used to skip over a key prefix
     :param key_func: a key mapping function
     :param key_parts_filter: a filter function for excluding keys
     :param value_func: a value mapping func
@@ -41,7 +39,8 @@ def expand_config(dct,
         if not key_parts_filter(key_parts):
             continue
         key_config = config
-        for key_part in key_parts[skip_to:-1]:
+        # skip prefix
+        for key_part in key_parts[1:-1]:
             key_config = key_config.setdefault(key_func(key_part), dict())
         key_config[key_func(key_parts[-1])] = value_func(value)
 
@@ -54,7 +53,7 @@ def get_config_filename(metadata):
     environment variable.
 
     """
-    envvar = "{}_SETTINGS".format(underscore(metadata.name).upper())
+    envvar = "{}__SETTINGS".format(underscore(metadata.name).upper())
     try:
         return environ[envvar]
     except KeyError:
@@ -91,7 +90,7 @@ def _load_from_environ(metadata, value_func=None):
     Load configuration from environment variables.
 
     Any environment variable prefixed with the metadata's name will be
-    used to recursively set dictionary keys, splitting on '_' or '__'.
+    used to recursively set dictionary keys, splitting on '__'.
 
     :param value_func: a mutator for the envvar's value (if any)
 
@@ -108,13 +107,12 @@ def _load_from_environ(metadata, value_func=None):
     # | FOO_BAR_BAZ | foo-bar | yes      |
     # +-------------+---------+----------+
 
-    prefix = metadata.name.upper().replace("-", "_").split("_")
+    prefix = metadata.name.upper().replace("-", "_")
 
     return expand_config(
         environ,
-        separator=lambda key: "__" if "__" in key else "_",
-        skip_to=len(prefix),
-        key_parts_filter=lambda key_parts: len(key_parts) > len(prefix) and key_parts[:len(prefix)] == prefix,
+        separator="__",
+        key_parts_filter=lambda key_parts: len(key_parts) > 1 and key_parts[0] == prefix,
         value_func=lambda value: value_func(value) if value_func else value,
     )
 
