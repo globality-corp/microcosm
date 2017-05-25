@@ -66,7 +66,6 @@ def test_expand_config():
                 "this": "that",
             },
             key_parts_filter=lambda key_parts: key_parts[0] == "prefix",
-            skip_to=1,
             value_func=lambda value: value() if callable(value) else value,
         ),
         is_(equal_to(
@@ -96,7 +95,7 @@ def test_get_config_filename():
 
     """
     metadata = Metadata("foo-bar")
-    with envvar("FOO_BAR_SETTINGS", "/tmp/foo-bar.conf"):
+    with envvar("FOO_BAR__SETTINGS", "/tmp/foo-bar.conf"):
         config_filename = get_config_filename(metadata)
         assert_that(config_filename, is_(equal_to("/tmp/foo-bar.conf")))
 
@@ -108,7 +107,7 @@ def test_load_from_json_file():
     """
     metadata = Metadata("foo-bar")
     with configfile(dumps(dict(foo="bar"))) as configfile_:
-        with envvar("FOO_BAR_SETTINGS", configfile_.name):
+        with envvar("FOO_BAR__SETTINGS", configfile_.name):
             config = load_from_json_file(metadata)
             assert_that(config.foo, is_(equal_to("bar")))
 
@@ -128,22 +127,13 @@ def test_load_from_environ():
     Return configuration from environment.
 
     """
-    metadata = Metadata("foo")
-    with envvar("FOO_BAR", "baz"):
-        with envvar("FOO_FOO_THIS", "that"):
-            config = load_from_environ(metadata)
-    assert_that(config, is_(equal_to({"bar": "baz", "foo": {"this": "that"}})))
-
-
-def test_load_from_environ_double_underscore():
-    """
-    Return configuration from environment.
-
-    """
-    metadata = Metadata("foo")
-    with envvar("FOO_BAR", "baz"):
-        with envvar("FOO__BAZ", "bar"):
-            with envvar("FOO__BAR_BAZ__THIS", "that"):
+    from os import environ
+    for key in list(environ.keys()):
+        del environ[key]
+    metadata = Metadata("foo-dow")
+    with envvar("FOO_DOW__BAR", "baz"):
+        with envvar("FOO_DOW__BAZ", "bar"):
+            with envvar("FOO_DOW__BAR_BAZ__THIS", "that"):
                 config = load_from_environ(metadata)
     assert_that(config, is_(equal_to({
         "bar": "baz",
@@ -158,9 +148,9 @@ def test_load_multiple_values_for_on_componentfrom_environ():
 
     """
     metadata = Metadata("foo")
-    with envvar("FOO_BAR", "baz"):
-        with envvar("FOO_FOO_THIS", "that"):
-            with envvar("FOO_FOO_THAT", "this"):
+    with envvar("FOO__BAR", "baz"):
+        with envvar("FOO__FOO__THIS", "that"):
+            with envvar("FOO__FOO__THAT", "this"):
                 config = load_from_environ(metadata)
     assert_that(config, is_(equal_to({"bar": "baz", "foo": {"this": "that", "that": "this"}})))
 
@@ -171,8 +161,8 @@ def test_load_from_environ_json():
 
     """
     metadata = Metadata("foo")
-    with envvar("FOO_BAR", '["baz"]'):
-        with envvar("FOO_BAZ", 'true'):
+    with envvar("FOO__BAR", '["baz"]'):
+        with envvar("FOO__BAZ", 'true'):
             config = load_from_environ_as_json(metadata)
     assert_that(config, is_(equal_to({"bar": ["baz"], "baz": True})))
 
@@ -183,7 +173,7 @@ def test_load_from_environ_multipart_name():
 
     """
     metadata = Metadata("foo-bar")
-    with envvar("FOO_BAR_BAZ", "blah"):
+    with envvar("FOO_BAR__BAZ", "blah"):
         config = load_from_environ(metadata)
     assert_that(config, is_(equal_to({"baz": "blah"})))
 
@@ -195,8 +185,8 @@ def test_load_each():
     """
     metadata = Metadata("foo")
     with configfile(dumps(dict(foo="bar"))) as configfile_:
-        with envvar("FOO_SETTINGS", configfile_.name):
-            with envvar("FOO_BAR", "baz"):
+        with envvar("FOO__SETTINGS", configfile_.name):
+            with envvar("FOO__BAR", "baz"):
                 loader = load_each(load_from_json_file, load_from_environ)
                 config = loader(metadata)
     assert_that(config, is_(equal_to({
