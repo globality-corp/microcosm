@@ -66,6 +66,7 @@ def test_expand_config():
                 "this": "that",
             },
             key_parts_filter=lambda key_parts: key_parts[0] == "prefix",
+            skip_to=1,
             value_func=lambda value: value() if callable(value) else value,
         ),
         is_(equal_to(
@@ -127,9 +128,6 @@ def test_load_from_environ():
     Return configuration from environment.
 
     """
-    from os import environ
-    for key in list(environ.keys()):
-        del environ[key]
     metadata = Metadata("foo-dow")
     with envvar("FOO_DOW__BAR", "baz"):
         with envvar("FOO_DOW__BAZ", "bar"):
