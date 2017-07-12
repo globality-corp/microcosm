@@ -4,7 +4,6 @@ Scope bindings to multiple configurations.
 This feature is EXPERIMENTAL! Use at your own risk.
 
 """
-from collections import namedtuple
 from contextlib import contextmanager
 from functools import wraps
 
@@ -13,8 +12,15 @@ from microcosm.decorators import get_defaults
 from microcosm.registry import _registry
 
 
-# NB: currently does not forward graph components
-ScopedGraph = namedtuple("ScopedGraph", ["config", "metadata"])
+class ScopedGraph(object):
+
+    def __init__(self, graph, config):
+        self._graph = graph
+        self.config = config
+        self.metadata = graph.metadata
+
+    def __getattr__(self, key):
+        return getattr(self._graph, key)
 
 
 def scoped_binding(key, default_scope=None, registry=_registry):
@@ -137,11 +143,7 @@ class ScopedFactory(object):
             return self.cache[self.current_scope]
 
         scoped_config = self.get_scoped_config(graph)
-
-        scoped_graph = ScopedGraph(
-            config=scoped_config,
-            metadata=graph.metadata,
-        )
+        scoped_graph = ScopedGraph(graph, scoped_config)
 
         component = self.func(scoped_graph)
         self.cache[self.current_scope] = component
