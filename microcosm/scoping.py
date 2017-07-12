@@ -62,7 +62,7 @@ class ScopedProxy(object):
         """
         @wraps(func)
         def wrapper(*args, **kwargs):
-            scope = kwargs.pop("scope", self.factory.default_scope)
+            scope = kwargs.get("scope", self.factory.default_scope)
             with self.scoped_to(scope):
                 return func(*args, **kwargs)
         return wrapper
