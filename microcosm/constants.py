@@ -1,0 +1,7 @@
+"""
+Shared constants.
+
+"""
+
+
+RESERVED = object()
