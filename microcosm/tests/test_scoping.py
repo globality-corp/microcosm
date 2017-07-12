@@ -56,12 +56,10 @@ def test_scoped_to():
     )
     graph = create_object_graph("example", testing=True, loader=loader)
 
-    factory = graph.factory_for("adder")
-
-    with factory.scoped_to("bar"):
+    with graph.adder.scoped_to("bar"):
         assert_that(graph.adder(), is_(equal_to(5)))
 
-    with factory.scoped_to("baz"):
+    with graph.adder.scoped_to("baz"):
         assert_that(graph.adder(), is_(equal_to(3)))
 
 
@@ -74,9 +72,8 @@ def test_scoped():
         ),
     )
     graph = create_object_graph("example", testing=True, loader=loader)
-    factory = graph.factory_for("adder")
 
-    @factory.scoped
+    @graph.adder.scoped
     def helper(expected, **kwargs):
         assert_that(graph.adder(), is_(equal_to(expected)))
 

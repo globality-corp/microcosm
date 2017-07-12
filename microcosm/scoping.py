@@ -42,6 +42,31 @@ class ScopedProxy(object):
     def __getattr__(self, attr):
         return getattr(self.factory.create(self.graph), attr)
 
+    @contextmanager
+    def scoped_to(self, scope):
+        """
+        Context manager to switch scopes.
+
+        """
+        previous_scope = self.factory.current_scope
+        try:
+            self.factory.current_scope = scope
+            yield
+        finally:
+            self.factory.current_scope = previous_scope
+
+    def scoped(self, func):
+        """
+        Decorator to switch scopes.
+
+        """
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            scope = kwargs.pop("scope", self.factory.default_scope)
+            with self.scoped_to(scope):
+                return func(*args, **kwargs)
+        return wrapper
+
 
 class ScopedFactory(object):
     """
@@ -83,31 +108,6 @@ class ScopedFactory(object):
 
         """
         return True
-
-    @contextmanager
-    def scoped_to(self, scope):
-        """
-        Context manager to switch scopes.
-
-        """
-        previous_scope = self.current_scope
-        try:
-            self.current_scope = scope
-            yield
-        finally:
-            self.current_scope = previous_scope
-
-    def scoped(self, func):
-        """
-        Decorator to switch scopes.
-
-        """
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            scope = kwargs.pop("scope", self.default_scope)
-            with self.scoped_to(scope):
-                return func(*args, **kwargs)
-        return wrapper
 
     def get_scoped_config(self, graph):
         """
