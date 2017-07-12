@@ -11,6 +11,7 @@ from six import string_types
 
 from microcosm.caching import create_cache
 from microcosm.configuration import Configuration
+from microcosm.constants import RESERVED
 from microcosm.errors import CyclicGraphError, LockedGraphError
 from microcosm.decorators import get_defaults
 from microcosm.hooks import invoke_resolve_hook
@@ -18,9 +19,6 @@ from microcosm.loaders import load_from_environ
 from microcosm.metadata import Metadata
 from microcosm.profile import NoopProfiler
 from microcosm.registry import _registry
-
-
-RESERVED = object()
 
 
 class ObjectGraph(object):
@@ -77,6 +75,9 @@ class ObjectGraph(object):
         self._locked = False
         return self
 
+    def factory_for(self, key):
+        return self._registry.resolve(key)
+
     def __getattr__(self, key):
         """
         Access a component by its binding key.
@@ -93,9 +94,11 @@ class ObjectGraph(object):
                 raise CyclicGraphError(key)
             return component
         except KeyError:
-            if self._locked:
-                raise LockedGraphError(key)
-            return self._resolve_key(key)
+            pass
+
+        if self._locked:
+            raise LockedGraphError(key)
+        return self._resolve_key(key)
 
     def __setattr__(self, key, value):
         if not key.startswith("_") and key not in ("metadata", "config"):
@@ -125,7 +128,7 @@ class ObjectGraph(object):
         :raises LockedGraphError: if the graph is locked
         """
         with self._reserve(key):
-            factory = self._registry.resolve(key)
+            factory = self.factory_for(key)
             with self._profiler(key):
                 component = factory(self)
             invoke_resolve_hook(component)

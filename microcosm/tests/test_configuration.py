@@ -1,4 +1,7 @@
-"""Tests for configuration"""
+"""
+Tests for configuration
+
+"""
 from hamcrest import (
     assert_that,
     calling,

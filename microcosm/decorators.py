@@ -1,4 +1,7 @@
-"""Factory decorators"""
+"""
+Factory decorators
+
+"""
 from microcosm.registry import _registry
 
 
