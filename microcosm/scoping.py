@@ -161,7 +161,7 @@ class ScopedFactory(object):
         """
         func = graph.factory_for(key)
         if isinstance(func, cls):
-            return func
+            func = func.func
         factory = cls(key, func, default_scope)
-        graph._registry.bind(key, factory)
+        graph._registry.factories[key] = factory
         return factory
