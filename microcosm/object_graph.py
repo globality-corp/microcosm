@@ -78,6 +78,9 @@ class ObjectGraph(object):
     def factory_for(self, key):
         return self._registry.resolve(key)
 
+    def get(self, key):
+        return self._cache.get(key)
+
     def __getattr__(self, key):
         """
         Access a component by its binding key.

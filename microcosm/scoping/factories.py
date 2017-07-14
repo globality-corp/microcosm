@@ -1,71 +1,11 @@
 """
-Scope bindings to multiple configurations.
-
-This feature is EXPERIMENTAL! Use at your own risk.
+A factory that enables scoping.
 
 """
-from contextlib import contextmanager
-from functools import wraps
-
 from microcosm.configuration import Configuration
 from microcosm.decorators import get_defaults
-from microcosm.registry import _registry
-
-
-class ScopedGraph(object):
-
-    def __init__(self, graph, config):
-        self._graph = graph
-        self.config = config
-        self.metadata = graph.metadata
-
-    def __getattr__(self, key):
-        return getattr(self._graph, key)
-
-
-def scoped_binding(key, default_scope=None, registry=_registry):
-    def decorator(func):
-        registry.bind(key, ScopedFactory(key, func, default_scope))
-        return func
-    return decorator
-
-
-class ScopedProxy(object):
-
-    def __init__(self, graph, factory):
-        self.graph = graph
-        self.factory = factory
-
-    def __call__(self, *args, **kwargs):
-        return self.factory.create(self.graph)(*args, **kwargs)
-
-    def __getattr__(self, attr):
-        return getattr(self.factory.create(self.graph), attr)
-
-    @contextmanager
-    def scoped_to(self, scope):
-        """
-        Context manager to switch scopes.
-
-        """
-        previous_scope = self.factory.current_scope
-        try:
-            self.factory.current_scope = scope
-            yield
-        finally:
-            self.factory.current_scope = previous_scope
-
-    def scoped(self, func):
-        """
-        Decorator to switch scopes.
-
-        """
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            scope = kwargs.get("scope", self.factory.default_scope)
-            with self.scoped_to(scope):
-                return func(*args, **kwargs)
-        return wrapper
+from microcosm.scoping.object_graph import ScopedGraph
+from microcosm.scoping.proxies import ScopedProxy
 
 
 class ScopedFactory(object):
@@ -98,16 +38,10 @@ class ScopedFactory(object):
         self.current_scope = default_scope
         self.default_scope = default_scope
 
-        # cache instances here instead of in the graph cache
-        self.cache = {}
-
     @property
-    def no_cache(self):
-        """
-        Disable graph caching.
-
-        """
-        return True
+    def scoped_key(self):
+        # NB: deliberately conflating false-y values
+        return "{}.{}".format(self.current_scope or "", self.key)
 
     def get_scoped_config(self, graph):
         """
@@ -120,7 +54,7 @@ class ScopedFactory(object):
         })
 
         # merge in the appropriate config
-        if self.current_scope is None:
+        if not self.current_scope:
             target_config = graph.config
         else:
             target_config = graph.config.get(self.current_scope, {})
@@ -135,19 +69,30 @@ class ScopedFactory(object):
         Override component creation to use scoped config.
 
         """
-        self.create(graph)
+        self.resolve(graph)
         return ScopedProxy(graph, self)
 
-    def create(self, graph):
-        if self.current_scope in self.cache:
-            return self.cache[self.current_scope]
+    def resolve(self, graph):
+        """
+        Resolve a scoped component, respecting the graph cache.
 
+        """
+        cached = graph.get(self.scoped_key)
+        if cached:
+            return cached
+
+        component = self.create(graph)
+        graph.assign(self.scoped_key, component)
+        return component
+
+    def create(self, graph):
+        """
+        Create a new scoped component.
+
+        """
         scoped_config = self.get_scoped_config(graph)
         scoped_graph = ScopedGraph(graph, scoped_config)
-
-        component = self.func(scoped_graph)
-        self.cache[self.current_scope] = component
-        return component
+        return self.func(scoped_graph)
 
     @classmethod
     def infect(cls, graph, key, default_scope=None):

@@ -8,7 +8,7 @@ from microcosm.registry import _registry
 DEFAULTS = "_defaults"
 
 
-def binding(key, registry=_registry):
+def binding(key, registry=None):
     """
     Creates a decorator that binds a factory function to a key.
 
@@ -16,6 +16,9 @@ def binding(key, registry=_registry):
     :param: registry: the registry to bind to; defaults to the global registry
 
     """
+    if registry is None:
+        registry = _registry
+
     def decorator(func):
         registry.bind(key, func)
         return func
