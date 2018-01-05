@@ -10,7 +10,7 @@ from lazy import lazy
 from microcosm.errors import AlreadyBoundError, NotBoundError
 
 
-class Registry(object):
+class Registry:
     """
     Registry of component factories.
 

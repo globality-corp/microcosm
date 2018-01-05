@@ -4,7 +4,7 @@ A view of the object graph that exposes only a subset of configuration.
 """
 
 
-class ScopedGraph(object):
+class ScopedGraph:
 
     def __init__(self, graph, config):
         self._graph = graph

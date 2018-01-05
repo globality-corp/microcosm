@@ -9,11 +9,9 @@ Alternate cache implementations can be used to speed up performance
 """
 from abc import ABCMeta, abstractmethod
 from collections import defaultdict
-from six import add_metaclass
 
 
-@add_metaclass(ABCMeta)
-class Cache(object):
+class Cache(metaclass=ABCMeta):
     """
     A cache uses the basic dictionary interface and defines a name.
 

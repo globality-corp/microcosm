@@ -5,7 +5,7 @@ Factory loading profiling
 from time import time
 
 
-class NoopProfiler(object):
+class NoopProfiler:
 
     def __call__(self, key):
         return self
@@ -17,7 +17,7 @@ class NoopProfiler(object):
         pass
 
 
-class TimingProfiler(object):
+class TimingProfiler:
 
     def __init__(self):
         self.times = dict()

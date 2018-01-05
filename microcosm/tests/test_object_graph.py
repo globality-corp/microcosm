@@ -15,7 +15,7 @@ from microcosm.object_graph import create_object_graph
 from microcosm.registry import Registry
 
 
-class Parent(object):
+class Parent:
     def __init__(self, child):
         self.child = child
 
@@ -29,7 +29,7 @@ def create_parent(graph):
 # bind with a constructor
 @binding("child")
 @defaults(value="default_value")
-class Child(object):
+class Child:
     def __init__(self, graph):
         self.value = graph.config.child.value
 

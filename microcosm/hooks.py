@@ -8,7 +8,7 @@ global state or some other singleton).
 Example:
 
     @binding("foo")
-    class Foo(object):
+    class Foo:
         def __init__(self, graph):
             self.state = None
 
@@ -32,7 +32,7 @@ graph load time:
 
 
     @register
-    class Bar(object):
+    class Bar:
         passs
 
 

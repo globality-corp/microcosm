@@ -32,7 +32,7 @@ from contextlib import contextmanager
 from functools import wraps
 
 
-class ScopedProxy(object):
+class ScopedProxy:
     """
     Proxy component requests back to the factory to dynamically resolve scope.
 

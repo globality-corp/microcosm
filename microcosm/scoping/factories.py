@@ -8,7 +8,7 @@ from microcosm.scoping.object_graph import ScopedGraph
 from microcosm.scoping.proxies import ScopedProxy
 
 
-class ScopedFactory(object):
+class ScopedFactory:
     """
     A factory bound to a scoped config key.
 

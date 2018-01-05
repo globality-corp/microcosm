@@ -15,7 +15,7 @@ def foo_hook(foo, value):
 
 
 @binding("foo")
-class Foo(object):
+class Foo:
 
     def __init__(self, graph):
         self.callbacks = []
@@ -29,7 +29,7 @@ def new_foo(graph):
 on_resolve(Foo, foo_hook, "baz")
 
 
-class TestHooks(object):
+class TestHooks:
     """
     Test hook invocations.
 

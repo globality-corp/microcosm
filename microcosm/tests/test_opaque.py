@@ -104,7 +104,7 @@ def test_collaboration():
     """
     # set up a parent collaborator that uses a child collaborator
     @binding("parent_collaborator")
-    class Parent(object):
+    class Parent:
         def __init__(self, graph):
             self.child_collaborator = graph.child_collaborator
 
@@ -112,7 +112,7 @@ def test_collaboration():
             return self.child_collaborator()
 
     @binding("child_collaborator")
-    class Child(object):
+    class Child:
         def __init__(self, graph):
             self.opaque = graph.opaque
 
