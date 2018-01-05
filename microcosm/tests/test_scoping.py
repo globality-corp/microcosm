@@ -14,7 +14,7 @@ from microcosm.scoping import scoped_binding, ScopedFactory
     first=1,
     second=2,
 )
-class Adder(object):
+class Adder:
 
     def __init__(self, graph):
         self.first = graph.config.adder.first
@@ -25,7 +25,7 @@ class Adder(object):
 
 
 @scoped_binding("counter")
-class Counter(object):
+class Counter:
     count = 0
 
     def __init__(self, graph):

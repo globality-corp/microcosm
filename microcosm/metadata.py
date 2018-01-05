@@ -6,7 +6,7 @@ from os.path import abspath, dirname, join
 from sys import modules
 
 
-class Metadata(object):
+class Metadata:
     """
     Service metadata.
 

@@ -7,7 +7,6 @@ to the graph lazily (or via `graph.use()`) and are cached for reuse.
 
 """
 from contextlib import contextmanager
-from six import string_types
 
 from microcosm.caching import create_cache
 from microcosm.configuration import Configuration
@@ -21,7 +20,7 @@ from microcosm.profile import NoopProfiler
 from microcosm.registry import _registry
 
 
-class ObjectGraph(object):
+class ObjectGraph:
     """
     An object graph contains all of the instantiated components for a microservice.
 
@@ -177,7 +176,7 @@ def create_object_graph(name,
     if profiler is None:
         profiler = NoopProfiler()
 
-    if cache is None or isinstance(cache, string_types):
+    if cache is None or isinstance(cache, str):
         cache = create_cache(cache)
 
     return ObjectGraph(
