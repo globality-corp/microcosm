@@ -8,6 +8,7 @@ to the graph lazily (or via `graph.use()`) and are cached for reuse.
 """
 from contextlib import contextmanager
 
+from microcosm.annotations import evaluate, split
 from microcosm.caching import create_cache
 from microcosm.configuration import Configuration
 from microcosm.constants import RESERVED
@@ -167,11 +168,15 @@ def create_object_graph(name,
         root_path=root_path,
     )
 
-    config = Configuration({
+    defaults = {
         key: get_defaults(value)
         for key, value in registry.all.items()
-    })
+    }
+
+    data, annotations = split(defaults)
+    config = Configuration(data)
     config.merge(loader(metadata))
+    evaluate(metadata, annotations, config)
 
     if profiler is None:
         profiler = NoopProfiler()
