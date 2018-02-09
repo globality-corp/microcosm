@@ -42,3 +42,24 @@ def get_defaults(func):
 
     """
     return getattr(func, DEFAULTS, {})
+
+
+def iter_keys(dct, prefix=""):
+    for key, value in dct.items():
+        if isinstance(value, dict):
+            yield from iter_keys(value, f"{key}.")
+        else:
+            yield f"{prefix}{key}"
+
+
+def public(loader):
+    """
+    Flag a loader as non-secret.
+
+    """
+    def load(metadata):
+        data = loader(metadata)
+        for key in iter_keys(data):
+            metadata.keys["public"].add(key)
+        return data
+    return load

@@ -2,6 +2,7 @@
 Service metadata
 
 """
+from collections import defaultdict
 from os.path import abspath, dirname, join
 from sys import modules
 
@@ -28,6 +29,7 @@ class Metadata:
         self.testing = testing
         self.import_name = import_name or self.name
         self.root_path = root_path or self.get_root_path(self.import_name)
+        self.keys = defaultdict(set)
 
     def get_root_path(self, name):
         """
