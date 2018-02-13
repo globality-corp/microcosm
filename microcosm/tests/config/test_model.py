@@ -13,7 +13,7 @@ from hamcrest import (
     raises,
 )
 
-from microcosm.configuration import Configuration
+from microcosm.config.model import Configuration
 
 
 def test_attribute_access():
