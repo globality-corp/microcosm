@@ -9,10 +9,9 @@ to the graph lazily (or via `graph.use()`) and are cached for reuse.
 from contextlib import contextmanager
 
 from microcosm.caching import create_cache
-from microcosm.configuration import Configuration
+from microcosm.config.api import configure
 from microcosm.constants import RESERVED
 from microcosm.errors import CyclicGraphError, LockedGraphError
-from microcosm.decorators import get_defaults
 from microcosm.hooks import invoke_resolve_hook
 from microcosm.loaders import load_from_environ
 from microcosm.metadata import Metadata
@@ -167,11 +166,7 @@ def create_object_graph(name,
         root_path=root_path,
     )
 
-    config = Configuration({
-        key: get_defaults(value)
-        for key, value in registry.all.items()
-    })
-    config.merge(loader(metadata))
+    config = configure(registry, metadata, loader)
 
     if profiler is None:
         profiler = NoopProfiler()

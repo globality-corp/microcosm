@@ -8,8 +8,8 @@ from hamcrest import (
 from microcosm.decorators import (
     binding,
     defaults,
-    get_defaults,
 )
+from microcosm.config.api import get_defaults
 from microcosm.registry import Registry
 
 

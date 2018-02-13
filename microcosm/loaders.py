@@ -13,7 +13,7 @@ from os import environ
 
 from inflection import underscore
 
-from microcosm.configuration import Configuration
+from microcosm.config.model import Configuration
 
 
 def expand_config(dct,
@@ -156,6 +156,8 @@ def load_each(*loaders):
     """
     def _load_each(metadata):
         config = loaders[0](metadata)
+        if not isinstance(config, Configuration):
+            config = Configuration(config)
         for loader in loaders[1:]:
             next_config = loader(metadata)
             config.merge(next_config)

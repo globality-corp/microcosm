@@ -34,11 +34,3 @@ def defaults(**kwargs):
         setattr(func, DEFAULTS, kwargs)
         return func
     return decorator
-
-
-def get_defaults(func):
-    """
-    Retrieve the defaults for a factory function.
-
-    """
-    return getattr(func, DEFAULTS, {})
