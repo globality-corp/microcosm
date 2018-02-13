@@ -2,8 +2,7 @@
 A factory that enables scoping.
 
 """
-from microcosm.configuration import Configuration
-from microcosm.decorators import get_defaults
+from microcosm.config.api import configure_scoped
 from microcosm.scoping.object_graph import ScopedGraph
 from microcosm.scoping.proxies import ScopedProxy
 
@@ -48,21 +47,16 @@ class ScopedFactory:
         Compute a configuration using the current scope.
 
         """
-        # start with the factory's defaults
-        config = Configuration({
-            self.key: get_defaults(self.func),
-        })
+        def loader(metadata):
+            if not self.current_scope:
+                target = graph.config
+            else:
+                target = graph.config.get(self.current_scope, {})
+            return {
+                self.key: target.get(self.key, {}),
+            }
 
-        # merge in the appropriate config
-        if not self.current_scope:
-            target_config = graph.config
-        else:
-            target_config = graph.config.get(self.current_scope, {})
-
-        config.merge({
-            self.key: target_config.get(self.key, {}),
-        })
-        return config
+        return configure_scoped(graph, self.key, self.func, loader)
 
     def __call__(self, graph):
         """
