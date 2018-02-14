@@ -74,16 +74,16 @@ class Requirement:
     A value type for configuration defaults that represents *expected* config.
 
     """
-    def __init__(self, type=str, required=True, default_value=None, mock_value=None, *args, **kwargs):
+    def __init__(self, type=str, default_value=None, mock_value=None, required=True, *args, **kwargs):
         """
         :param type: a type callable
         :param mock_value: a default value to use durint testing (only)
 
         """
         self.type = type
-        self.required = required
         self.default_value = default_value
         self.mock_value = mock_value
+        self.required = required
 
     def validate(self, metadata, path, value):
         """
