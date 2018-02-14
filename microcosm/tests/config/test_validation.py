@@ -45,6 +45,17 @@ class TestValidation:
             ),
         ))
 
+    def test_valid_default(self):
+        self.create_fixture(required(int, default_value="1"))
+        loader = load_from_dict()
+
+        config = configure(self.registry.defaults, self.metadata, loader)
+        assert_that(config, has_entries(
+            foo=has_entries(
+                value=1,
+            ),
+        ))
+
     def test_invalid_missing(self):
         self.create_fixture(required(int))
         loader = load_from_dict()
