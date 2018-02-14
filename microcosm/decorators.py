@@ -2,10 +2,8 @@
 Factory decorators
 
 """
+from microcosm.constants import DEFAULTS
 from microcosm.registry import _registry
-
-
-DEFAULTS = "_defaults"
 
 
 def binding(key, registry=None):

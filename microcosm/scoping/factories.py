@@ -2,7 +2,8 @@
 A factory that enables scoping.
 
 """
-from microcosm.config.api import configure_scoped
+from microcosm.config.api import configure
+from microcosm.registry import get_defaults
 from microcosm.scoping.object_graph import ScopedGraph
 from microcosm.scoping.proxies import ScopedProxy
 
@@ -56,7 +57,10 @@ class ScopedFactory:
                 self.key: target.get(self.key, {}),
             }
 
-        return configure_scoped(graph, self.key, self.func, loader)
+        defaults = {
+            self.key: get_defaults(self.func),
+        }
+        return configure(defaults, graph.metadata, loader)
 
     def __call__(self, graph):
         """

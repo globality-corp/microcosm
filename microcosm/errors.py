@@ -1,4 +1,7 @@
-"""Error types"""
+"""
+Error types
+
+"""
 
 
 class AlreadyBoundError(Exception):
@@ -28,6 +31,14 @@ class LockedGraphError(Exception):
 class NotBoundError(Exception):
     """
     Raised if not factory is bound to a name.
+
+    """
+    pass
+
+
+class ValidationError(Exception):
+    """
+    Raised if a configuration value fails validation.
 
     """
     pass

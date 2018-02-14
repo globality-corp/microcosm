@@ -7,7 +7,16 @@ from pkg_resources import iter_entry_points
 
 from lazy import lazy
 
+from microcosm.constants import DEFAULTS
 from microcosm.errors import AlreadyBoundError, NotBoundError
+
+
+def get_defaults(func):
+    """
+    Retrieve the defaults for a factory function.
+
+    """
+    return getattr(func, DEFAULTS, {})
 
 
 class Registry:
@@ -34,10 +43,22 @@ class Registry:
     def all(self):
         """
         Return a synthetic dictionary of all factories.
+
         """
         return {
             key: value
             for key, value in chain(self.entry_points.items(), self.factories.items())
+        }
+
+    @property
+    def defaults(self):
+        """
+        Return a nested dicionary of all registered factory defaults.
+
+        """
+        return {
+            key: get_defaults(value)
+            for key, value in self.all.items()
         }
 
     def bind(self, key, factory):

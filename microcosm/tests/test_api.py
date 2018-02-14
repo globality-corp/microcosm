@@ -1,4 +1,7 @@
-"""Test high-level api"""
+"""
+Test high-level api
+
+"""
 
 
 def test_api_imports():

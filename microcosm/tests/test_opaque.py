@@ -8,8 +8,7 @@ from hamcrest import (
     is_,
 )
 
-from microcosm.api import binding, create_object_graph
-from microcosm.loaders import load_from_dict
+from microcosm.api import binding, create_object_graph, load_from_dict
 from microcosm.opaque import Opaque
 
 

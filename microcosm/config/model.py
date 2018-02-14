@@ -1,4 +1,8 @@
-"""Configuration model and loading"""
+"""
+Configuration modeling, loading, and validation.
+
+"""
+from microcosm.errors import ValidationError
 
 
 class Configuration(dict):
@@ -63,3 +67,37 @@ class Configuration(dict):
                 self[key] = value
 
     __setitem__ = __setattr__
+
+
+class Requirement:
+    """
+    A value type for configuration defaults that represents *expected* config.
+
+    """
+    def __init__(self, type=str, required=True, mock_value=None, *args, **kwargs):
+        """
+        :param type: a type callable
+        :param mock_value: a default value to use durint testing (only)
+
+        """
+        self.type = type
+        self.required = required
+        self.mock_value = mock_value
+
+    def validate(self, metadata, path, value):
+        """
+        Validate this requirement.
+
+        """
+        if isinstance(value, Requirement):
+            if metadata.testing and self.mock_value is not None:
+                value = self.mock_value
+            elif not value.required:
+                return None
+            else:
+                raise ValidationError(f"Missing required configuration for: {'.'.join(path)}")
+
+        try:
+            return self.type(value)
+        except ValueError:
+            raise ValidationError(f"Missing required configuration for: {'.'.join(path)}: {value}")

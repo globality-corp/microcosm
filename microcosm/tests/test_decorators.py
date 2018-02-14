@@ -1,16 +1,15 @@
-"""Tests for factory decorators"""
+"""
+Tests for factory decorators
+
+"""
 from hamcrest import (
     assert_that,
     equal_to,
     is_,
 )
 
-from microcosm.decorators import (
-    binding,
-    defaults,
-)
-from microcosm.config.api import get_defaults
-from microcosm.registry import Registry
+from microcosm.decorators import binding, defaults
+from microcosm.registry import get_defaults, Registry
 
 
 def test_defaults():

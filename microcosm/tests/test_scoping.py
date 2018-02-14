@@ -4,8 +4,7 @@ Test binding scoping.
 """
 from hamcrest import assert_that, equal_to, instance_of, is_
 
-from microcosm.api import create_object_graph, defaults
-from microcosm.loaders import load_from_dict
+from microcosm.api import create_object_graph, defaults, load_from_dict
 from microcosm.scoping import scoped_binding, ScopedFactory
 
 

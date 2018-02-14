@@ -1,4 +1,7 @@
-"""Example component factory"""
+"""
+Example component factory
+
+"""
 
 
 def create_hello_world(graph):

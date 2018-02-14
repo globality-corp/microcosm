@@ -3,38 +3,19 @@ Configuration API.
 
 """
 from microcosm.config.model import Configuration
-from microcosm.decorators import DEFAULTS
+from microcosm.config.validation import validate
 
 
-def get_defaults(func):
-    """
-    Retrieve the defaults for a factory function.
-
-    """
-    return getattr(func, DEFAULTS, {})
-
-
-def configure(registry, metadata, loader):
+def configure(defaults, metadata, loader):
     """
     Build a fresh configuration.
 
+    :params defaults: a nested dictionary of keys and their default values
+    :params metadata: the graph metadata
+    :params loader: a configuration loader
+
     """
-    config = Configuration({
-        key: get_defaults(value)
-        for key, value in registry.all.items()
-    })
+    config = Configuration(defaults)
     config.merge(loader(metadata))
-    return config
-
-
-def configure_scoped(graph, key, factory, loader):
-    """
-    Build a sub-configuration for a specific binding.
-
-    :params key: a binding key
-    """
-    config = Configuration({
-        key: get_defaults(factory),
-    })
-    config.merge(loader(graph.metadata))
+    validate(defaults, metadata, config)
     return config

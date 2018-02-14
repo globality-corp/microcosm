@@ -1,4 +1,7 @@
-"""Object Graph Tests"""
+"""
+Object Graph Tests
+
+"""
 from hamcrest import (
     assert_that,
     calling,
