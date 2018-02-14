@@ -166,7 +166,8 @@ def create_object_graph(name,
         root_path=root_path,
     )
 
-    config = configure(registry, metadata, loader)
+    defaults = registry.defaults
+    config = configure(defaults, metadata, loader)
 
     if profiler is None:
         profiler = NoopProfiler()

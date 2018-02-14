@@ -1,4 +1,7 @@
-"""Registry tests"""
+"""
+Registry tests
+
+"""
 from hamcrest import (
     assert_that,
     calling,
