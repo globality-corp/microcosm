@@ -27,13 +27,14 @@ class ObjectGraph:
     components forms a directed acyclic graph.
 
     """
-    def __init__(self, metadata, config, registry, profiler, cache):
+    def __init__(self, metadata, config, registry, profiler, cache, loader):
         self.metadata = metadata
         self.config = config
         self._locked = False
         self._registry = registry
         self._profiler = profiler
         self._cache = cache
+        self.loader = loader
 
     def use(self, *keys):
         """
@@ -102,7 +103,7 @@ class ObjectGraph:
         return self._resolve_key(key)
 
     def __setattr__(self, key, value):
-        if not key.startswith("_") and key not in ("metadata", "config"):
+        if not key.startswith("_") and key not in ("metadata", "config", "loader"):
             raise Exception("Cannot setattr on ObjectGraph for key: {}".format(key))
         super(ObjectGraph, self).__setattr__(key, value)
 
@@ -181,4 +182,5 @@ def create_object_graph(name,
         registry=registry,
         profiler=profiler,
         cache=cache,
+        loader=loader,
     )
