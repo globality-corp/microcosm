@@ -88,6 +88,17 @@ class Registry:
         except NotBoundError:
             return self._resolve_from_entry_point(key)
 
+    def find_by_type(self, value_type):
+        """
+        Find all items of a given type in the registry.
+
+        """
+        return [
+            value
+            for value in self.factories.values()
+            if type(value) == value_type
+        ]
+
     def _resolve_from_binding(self, key):
         """
         Resolve using bindings.

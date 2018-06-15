@@ -67,3 +67,15 @@ def test_resolve_not_found():
         calling(registry.resolve).with_args("foo"),
         raises(NotBoundError),
     )
+
+
+def test_find_by_type():
+    """
+    Finds all items in a registry by type.
+
+    """
+    registry = Registry()
+    registry.bind("foo", create_foo)
+    registry.bind("bar", "bar")
+    type_items = registry.find_by_type(type(create_foo))
+    assert_that(type_items, is_(equal_to([create_foo])))
