@@ -75,6 +75,9 @@ class ProcessCache(Cache):
     def __contains__(self, name):
         return name in ProcessCache.CACHES[self.scope]
 
+    def get(self, name):
+        return self.__getitem__(name)
+
     def __getitem__(self, name):
         return ProcessCache.CACHES[self.scope][name]
 
