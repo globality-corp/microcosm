@@ -1,0 +1,113 @@
+defaults: &defaults
+  working_directory: ~/repo
+  docker:
+    - image: circleci/python:3.6.1
+      environment:
+        PYPI_USERNAME: "InjectedDuringRuntime"
+        PYPI_PASSWORD: "InjectedDuringRuntime"
+
+whitelist: &whitelist
+  paths:
+    .
+
+version: 2
+
+jobs:
+  checkout:
+    <<: *defaults
+
+    steps:
+      - checkout
+
+      - restore_cache: # restores saved dependency cache if the Branch key template or requirements.txt files have not changed since the previous run
+          key: deps1-{{ checksum "setup.py" }}
+
+      - run: # install and activate virtual environment with pip
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            pip install tox
+            pip install -e .
+
+      - save_cache: # special step to save dependency cache
+          key: deps1-{{ checksum "setup.py" }}
+          paths:
+            - "venv"
+
+      - persist_to_workspace:
+          root: ~/repo
+          <<: *whitelist
+
+  lint:
+    <<: *defaults
+
+    steps:
+      - run:
+          name: Lint Code
+          command: |
+            echo "This is a dummy step, tox is handling everything in test"
+
+  test:
+    <<: *defaults
+
+    steps:
+      - attach_workspace:
+          at: ~/repo
+
+      - run:
+          name: Test code
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            tox
+
+  deploy:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          name: Deploy
+          command: |
+            echo "[distutils]" > ~/.pypirc
+            echo "index-servers =" >> ~/.pypirc
+            echo "    pypi" >> ~/.pypirc
+            echo >> ~/.pypirc
+            echo "[pypi]" >> ~/.pypirc
+            echo "username:$PYPI_USERNAME" >> ~/.pypirc
+            echo "password:$PYPI_PASSWORD" >> ~/.pypirc
+            echo >> ~/.pypirc
+            python setup.py register -r pypi
+            python setup.py sdist upload -r pypi
+
+workflows:
+  version: 2
+
+  build-and-release:
+    jobs:
+      - checkout:
+          filters:
+            # run for all branches and tags
+            tags:
+              only: /.*/
+      - lint:
+          requires:
+            - checkout
+          filters:
+            # run for all branches and tags
+            tags:
+              only: /.*/
+      - test:
+          requires:
+            - checkout
+          filters:
+            # run for all branches and tags
+            tags:
+              only: /.*/
+      - deploy:
+          requires:
+            - test
+            - lint
+          filters:
+            branches:
+              only: develop

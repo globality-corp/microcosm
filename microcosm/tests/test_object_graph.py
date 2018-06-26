@@ -64,6 +64,7 @@ def test_object_graph_use():
         "parent",
         "hello_world"
     )
+    assert_that(graph.get('parent'), is_(instance_of(Parent)))
     assert_that(parent, is_(instance_of(Parent)))
 
 
