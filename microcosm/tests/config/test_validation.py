@@ -10,7 +10,7 @@ from hamcrest import (
 )
 from microcosm.api import binding, defaults, load_from_dict, required, typed
 from microcosm.config.api import configure
-from microcosm.config.types import boolean
+from microcosm.config.types import boolean, string_list, int_list
 from microcosm.errors import ValidationError
 from microcosm.metadata import Metadata
 from microcosm.registry import Registry
@@ -87,6 +87,70 @@ class TestValidation:
         assert_that(config, has_entries(
             foo=has_entries(
                 value=True,
+            ),
+        ))
+
+    def test_int_list_value(self):
+        self.create_fixture(required(int_list))
+        loader = load_from_dict(
+            foo=dict(
+                value="['1', '2']",
+            ),
+        )
+
+        metadata = Metadata("test", testing=True)
+        config = configure(self.registry.defaults, metadata, loader)
+        assert_that(config, has_entries(
+            foo=has_entries(
+                value=[1, 2],
+            ),
+        ))
+
+    def test_int_list_value(self):
+        self.create_fixture(required(int_list))
+        loader = load_from_dict(
+            foo=dict(
+                value="['1', '2']",
+            ),
+        )
+
+        metadata = Metadata("test", testing=True)
+        config = configure(self.registry.defaults, metadata, loader)
+        assert_that(config, has_entries(
+            foo=has_entries(
+                value=[1, 2],
+            ),
+        ))
+
+    def test_list_value_already_list(self):
+        self.create_fixture(required(string_list))
+        loader = load_from_dict(
+            foo=dict(
+                value=["1", "2"],
+            ),
+        )
+
+        metadata = Metadata("test", testing=True)
+        config = configure(self.registry.defaults, metadata, loader)
+        assert_that(config, has_entries(
+            foo=has_entries(
+                value=[1, 2],
+            ),
+        ))
+
+    def test_list_value_already_list(self):
+        self.create_fixture(required(string_list))
+        loader = load_from_dict(
+            foo=dict(
+                value=["item", "another_item"],
+            ),
+        )
+
+        metadata = Metadata("test", testing=True)
+        config = configure(self.registry.defaults, metadata, loader)
+        assert_that(config, has_entries(
+            foo=has_entries(
+                value=["item", "another_item"],
             ),
         ))
 
