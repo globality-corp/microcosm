@@ -2,6 +2,8 @@
 Object Graph Tests
 
 """
+from unittest.mock import Mock
+
 from hamcrest import (
     assert_that,
     calling,
@@ -10,7 +12,6 @@ from hamcrest import (
     is_,
     raises,
 )
-from mock import Mock
 
 from microcosm.decorators import defaults, binding
 from microcosm.errors import CyclicGraphError, LockedGraphError

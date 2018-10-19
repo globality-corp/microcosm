@@ -106,8 +106,7 @@ makes a few assumption that allow for a great deal of simplication:
     a non-goal.
 
  3. Mocking (and patching) of the object graph is important and needs to be easy. Unit tests
-    expect to use the ubiquitous [mock](https://github.com/testing-cabal/mock) library; it
-    should be trivial to temporarily replace a component.
+    expect to use `unittest.mock library; it should be trivial to temporarily replace a component.
 
  4. Some components will be functions that modify other components rather than objects
     that need to be instantiated.
