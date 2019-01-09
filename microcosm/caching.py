@@ -64,7 +64,7 @@ class ProcessCache(Cache):
     time (at the expense of a "clean slate" testing context).
 
     """
-    CACHES: Mapping[str, Mapping[str, Any]]  = defaultdict(dict)
+    CACHES: Mapping[str, Mapping[str, Any]] = defaultdict(dict)
 
     @classmethod
     def name(self):
