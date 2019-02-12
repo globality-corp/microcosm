@@ -19,3 +19,16 @@ def boolean(value):
         return False
 
     return strtobool(value)
+
+
+def integer(value):
+    """
+    Configuration-friendly integer type converter.
+
+    Supports both integer-valued and string-valued inputs (e.g. from env vars).
+
+    """
+    if isinstance(value, int):
+        return value
+
+    return int(value)
