@@ -102,6 +102,30 @@ class TestValidation:
             ),
         ))
 
+    def test_comma_separated_list_empty(self):
+        self.create_fixture(typed(comma_separated_list, mock_value=""))
+        loader = load_from_dict()
+
+        metadata = Metadata("test", testing=True)
+        config = configure(self.registry.defaults, metadata, loader)
+        assert_that(config, has_entries(
+            foo=has_entries(
+                value=[],
+            ),
+        ))
+
+    def test_comma_separated_list_unconverted(self):
+        self.create_fixture(typed(comma_separated_list, mock_value=["abc", "def", "ghi"]))
+        loader = load_from_dict()
+
+        metadata = Metadata("test", testing=True)
+        config = configure(self.registry.defaults, metadata, loader)
+        assert_that(config, has_entries(
+            foo=has_entries(
+                value=["abc", "def", "ghi"],
+            ),
+        ))
+
     def test_typed_converted(self):
         self.create_fixture(typed(int))
         loader = load_from_dict(
