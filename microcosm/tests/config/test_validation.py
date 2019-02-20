@@ -10,7 +10,7 @@ from hamcrest import (
 )
 from microcosm.api import binding, defaults, load_from_dict, required, typed
 from microcosm.config.api import configure
-from microcosm.config.types import boolean
+from microcosm.config.types import boolean, comma_separated_list
 from microcosm.errors import ValidationError
 from microcosm.metadata import Metadata
 from microcosm.registry import Registry
@@ -87,6 +87,42 @@ class TestValidation:
         assert_that(config, has_entries(
             foo=has_entries(
                 value=True,
+            ),
+        ))
+
+    def test_comma_separated_list_converted(self):
+        self.create_fixture(typed(comma_separated_list, mock_value="abc,def,ghi"))
+        loader = load_from_dict()
+
+        metadata = Metadata("test", testing=True)
+        config = configure(self.registry.defaults, metadata, loader)
+        assert_that(config, has_entries(
+            foo=has_entries(
+                value=["abc", "def", "ghi"],
+            ),
+        ))
+
+    def test_comma_separated_list_empty(self):
+        self.create_fixture(typed(comma_separated_list, mock_value=""))
+        loader = load_from_dict()
+
+        metadata = Metadata("test", testing=True)
+        config = configure(self.registry.defaults, metadata, loader)
+        assert_that(config, has_entries(
+            foo=has_entries(
+                value=[],
+            ),
+        ))
+
+    def test_comma_separated_list_unconverted(self):
+        self.create_fixture(typed(comma_separated_list, mock_value=["abc", "def", "ghi"]))
+        loader = load_from_dict()
+
+        metadata = Metadata("test", testing=True)
+        config = configure(self.registry.defaults, metadata, loader)
+        assert_that(config, has_entries(
+            foo=has_entries(
+                value=["abc", "def", "ghi"],
             ),
         ))
 
