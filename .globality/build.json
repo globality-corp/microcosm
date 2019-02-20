@@ -1,0 +1,10 @@
+{
+  "params": {
+    "name": "microcosm",
+    "pypi": {
+      "repository": "pypi"
+    }
+  },
+  "type": "python-library",
+  "version": "2019.1.2284"
+}

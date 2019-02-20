@@ -3,7 +3,7 @@ Registry of component factories.
 
 """
 from itertools import chain
-from pkg_resources import iter_entry_points
+from pkg_resources import DistributionNotFound, iter_entry_points
 
 from lazy import lazy
 
@@ -32,11 +32,11 @@ class Registry:
     @lazy
     def entry_points(self):
         return {
-            entry_point.name: entry_point.load()
+            name: factory
             # NB: it's possible to have two entry points for the same name
             # (but in different distributions). This will cause unpredictable
             # behavior; don't do that.
-            for entry_point in iter_entry_points(group="microcosm.factories")
+            for name, factory in self._iter_entry_points()
         }
 
     @property
@@ -87,6 +87,15 @@ class Registry:
             return self._resolve_from_binding(key)
         except NotBoundError:
             return self._resolve_from_entry_point(key)
+
+    def _iter_entry_points(self):
+        for entry_point in iter_entry_points(group="microcosm.factories"):
+            try:
+                factory = entry_point.load()
+            except DistributionNotFound:
+                continue
+
+            yield (entry_point.name, factory)
 
     def _resolve_from_binding(self, key):
         """

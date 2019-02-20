@@ -9,6 +9,7 @@ Alternate cache implementations can be used to speed up performance
 """
 from abc import ABCMeta, abstractmethod
 from collections import defaultdict
+from typing import Mapping, Any
 
 
 class Cache(metaclass=ABCMeta):
@@ -63,7 +64,7 @@ class ProcessCache(Cache):
     time (at the expense of a "clean slate" testing context).
 
     """
-    CACHES = defaultdict(dict)
+    CACHES: Mapping[str, Mapping[str, Any]] = defaultdict(dict)
 
     @classmethod
     def name(self):
