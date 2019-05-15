@@ -7,35 +7,19 @@ Alternate cache implementations can be used to speed up performance
 (or to force re-creation).
 
 """
-from abc import ABCMeta, abstractmethod
 from collections import defaultdict
-from typing import Mapping, Any
+from collections.abc import MutableMapping
+from typing import Any, Mapping
 
 
-class Cache(metaclass=ABCMeta):
+class Cache(MutableMapping):
     """
-    A cache uses the basic dictionary interface and defines a name.
+    A cache supports the basic dictionary interface and defines a name.
 
     """
     @classmethod
     def name(self):
         raise NotImplementedError
-
-    @abstractmethod
-    def __contains__(self, name):
-        pass
-
-    @abstractmethod
-    def __getitem__(self, name):
-        pass
-
-    @abstractmethod
-    def __setitem__(self, name, component):
-        pass
-
-    @abstractmethod
-    def __delitem__(self, name):
-        pass
 
 
 class NaiveCache(dict, Cache):
@@ -76,9 +60,6 @@ class ProcessCache(Cache):
     def __contains__(self, name):
         return name in ProcessCache.CACHES[self.scope]
 
-    def get(self, name):
-        return self.__getitem__(name)
-
     def __getitem__(self, name):
         return ProcessCache.CACHES[self.scope][name]
 
@@ -87,6 +68,12 @@ class ProcessCache(Cache):
 
     def __delitem__(self, name):
         del ProcessCache.CACHES[self.scope][name]
+
+    def __iter__(self):
+        return iter(ProcessCache.CACHES[self.scope])
+
+    def __len__(self):
+        return len(ProcessCache.CACHES[self.scope])
 
 
 def create_cache(name):

@@ -7,7 +7,9 @@ from unittest.mock import Mock
 from hamcrest import (
     assert_that,
     calling,
+    contains,
     equal_to,
+    has_items,
     instance_of,
     is_,
     raises,
@@ -67,6 +69,14 @@ def test_object_graph_use():
     )
     assert_that(graph.get('parent'), is_(instance_of(Parent)))
     assert_that(parent, is_(instance_of(Parent)))
+    assert_that(
+        list(graph.items()),
+        has_items(
+            contains("parent", is_(instance_of(Parent))),
+            contains("child", is_(instance_of(Child))),
+            contains("hello_world", is_(equal_to("hello world"))),
+        )
+    )
 
 
 def test_object_graph_partial_use():
