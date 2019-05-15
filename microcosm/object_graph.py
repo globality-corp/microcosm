@@ -7,6 +7,7 @@ to the graph lazily (or via `graph.use()`) and are cached for reuse.
 
 """
 from contextlib import contextmanager
+from typing import Any, Iterable, Tuple
 
 from microcosm.caching import create_cache
 from microcosm.config.api import configure
@@ -136,6 +137,12 @@ class ObjectGraph:
             invoke_resolve_hook(component)
 
         return self.assign(key, component)
+
+    def items(self) -> Iterable[Tuple[str, Any]]:
+        """
+        Iterates over tuples of (key, component) for all bound components.
+        """
+        yield from self._cache.items()
 
     __getitem__ = __getattr__
 
