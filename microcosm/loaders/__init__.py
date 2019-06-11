@@ -8,6 +8,7 @@ Configuration might be loaded from a file, from environment variables,
 or from an external service.
 
 """
+from microcosm.config.model import Configuration
 from microcosm.loaders.compose import (  # noqa: F401
     load_each,
 )
@@ -32,5 +33,5 @@ def load_from_dict(dct=None, **kwargs):
     dct.update(kwargs)
 
     def _load_from_dict(metadata):
-        return dict(dct)
+        return Configuration(dct)
     return _load_from_dict

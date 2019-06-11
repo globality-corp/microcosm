@@ -5,9 +5,14 @@ Test loading function composition.
 from json import dumps
 
 from hamcrest import assert_that, equal_to, is_
-
+from microcosm.config.model import Configuration
 from microcosm.loaders import load_from_dict
-from microcosm.loaders.compose import load_config_and_secrets, load_each, load_partitioned
+from microcosm.loaders.compose import (
+    load_config_and_secrets,
+    load_each,
+    load_partitioned,
+    pipeline_loader,
+)
 from microcosm.loaders.environment import load_from_environ
 from microcosm.loaders.settings import load_from_json_file
 from microcosm.metadata import Metadata
@@ -30,6 +35,26 @@ def test_load_each():
         "bar": "baz",
         "foo": "bar",
         "settings": settings_.name
+    })))
+
+
+def derivative_loader(metadata, config):
+    return Configuration(
+        bongo=config.foo,
+    )
+
+
+def test_pipeline_loader():
+    metadata = Metadata("foo")
+    initial_loader = load_from_dict(
+        foo="bar",
+    )
+
+    loader = pipeline_loader(initial_loader, derivative_loader)
+    config = loader(metadata)
+
+    assert_that(config, is_(equal_to({
+        "bongo": "bar",
     })))
 
 

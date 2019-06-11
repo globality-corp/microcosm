@@ -5,6 +5,8 @@ Functional composition of loaders.
 from collections import defaultdict
 
 from microcosm.config.model import Configuration
+from microcosm.metadata import Metadata
+from microcosm.types import DerivativeLoader, Loader
 
 
 def merge(configs):
@@ -12,6 +14,27 @@ def merge(configs):
     for config in configs:
         result.merge(config)
     return result
+
+
+def pipeline_loader(
+    initial_loader: Loader,
+    *derivative_loaders: DerivativeLoader,
+) -> Loader:
+    """
+    Returns a loader that will first call the `initial_loader`, then call each `derivative_loader`
+    in sequence, passing each the output of the previous loader, finally returning the output of the
+    final `derivative_loader`.
+
+    """
+    def loader(metadata: Metadata) -> Configuration:
+        config = initial_loader(metadata)
+
+        for derivative_loader in derivative_loaders:
+            config = derivative_loader(metadata, config)
+
+        return config
+
+    return loader
 
 
 def load_each(*loaders):
