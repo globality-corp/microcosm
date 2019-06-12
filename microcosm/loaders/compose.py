@@ -6,7 +6,7 @@ from collections import defaultdict
 
 from microcosm.config.model import Configuration
 from microcosm.metadata import Metadata
-from microcosm.types import DerivativeLoader, Loader
+from microcosm.typing import DerivativeLoader, Loader
 
 
 def merge(configs):
