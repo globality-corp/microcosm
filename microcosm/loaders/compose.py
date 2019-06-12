@@ -6,7 +6,7 @@ from collections import defaultdict
 
 from microcosm.config.model import Configuration
 from microcosm.metadata import Metadata
-from microcosm.typing import DerivativeLoader, Loader
+from microcosm.typing import Loader, SecondaryLoader
 
 
 def merge(configs):
@@ -16,23 +16,33 @@ def merge(configs):
     return result
 
 
-def pipeline_loader(
-    initial_loader: Loader,
-    *derivative_loaders: DerivativeLoader,
+def two_stage_loader(
+    primary_loader: Loader,
+    secondary_loader: SecondaryLoader,
+    prefer_secondary: bool = False,
 ) -> Loader:
     """
-    Returns a loader that will first call the `initial_loader`, then call each `derivative_loader`
-    in sequence, passing each the output of the previous loader, finally returning the output of the
-    final `derivative_loader`.
+    Returns a loader that will first call the `initial_loader`, then call
+    `secondary_loader`, passing it the output of `initial_loader`.  It merges
+    the output of the two functions.  In the case where the config output of
+    the two functions have overlapping keys, the `prefer_secondary` parameter
+    determines whether the secondary or primary output takes precendence.
 
     """
     def loader(metadata: Metadata) -> Configuration:
-        config = initial_loader(metadata)
+        primary_config = Configuration(primary_loader(metadata))
+        secondary_config = secondary_loader(metadata, primary_config)
 
-        for derivative_loader in derivative_loaders:
-            config = derivative_loader(metadata, config)
-
-        return config
+        if prefer_secondary:
+            return merge([
+                primary_config,
+                secondary_config,
+            ])
+        else:
+            return merge([
+                secondary_config,
+                primary_config,
+            ])
 
     return loader
 

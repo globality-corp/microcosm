@@ -9,7 +9,7 @@ or from an external service.
 
 """
 from microcosm.config.model import Configuration
-from microcosm.loaders.compose import load_each  # noqa: F401
+from microcosm.loaders.compose import load_each, two_stage_loader  # noqa: F401
 from microcosm.loaders.environment import (  # noqa: F401
     load_from_environ,
     load_from_environ_as_json,
@@ -29,3 +29,7 @@ def load_from_dict(dct=None, **kwargs):
     def _load_from_dict(metadata):
         return Configuration(dct)
     return _load_from_dict
+
+
+def empty_loader(metadata, Metadata):
+    return Configuration()
