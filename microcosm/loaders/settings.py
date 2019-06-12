@@ -6,8 +6,8 @@ and consumed using a customizable load function (default: json).
 
 """
 from json import loads
-
 from os import environ
+
 from inflection import underscore
 
 

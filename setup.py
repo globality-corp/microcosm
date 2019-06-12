@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 from setuptools import find_packages, setup
 
+
 project = "microcosm"
-version = "2.7.0"
+version = "2.8.0"
 
 setup(
     name=project,
     version=version,
     description="Microcosm - Simple microservice configuration",
+    long_description=open("README.md").read(),
+    long_description_content_type="text/markdown",
     author="Globality Engineering",
     author_email="engineering@globality.com",
     url="https://github.com/globality-corp/microcosm",

@@ -5,6 +5,8 @@ Functional composition of loaders.
 from collections import defaultdict
 
 from microcosm.config.model import Configuration
+from microcosm.metadata import Metadata
+from microcosm.typing import Loader, SecondaryLoader
 
 
 def merge(configs):
@@ -12,6 +14,37 @@ def merge(configs):
     for config in configs:
         result.merge(config)
     return result
+
+
+def two_stage_loader(
+    primary_loader: Loader,
+    secondary_loader: SecondaryLoader,
+    prefer_secondary: bool = False,
+) -> Loader:
+    """
+    Returns a loader that will first call the `initial_loader`, then call
+    `secondary_loader`, passing it the output of `initial_loader`.  It merges
+    the output of the two functions.  In the case where the config output of
+    the two functions have overlapping keys, the `prefer_secondary` parameter
+    determines whether the secondary or primary output takes precendence.
+
+    """
+    def loader(metadata: Metadata) -> Configuration:
+        primary_config = Configuration(primary_loader(metadata))
+        secondary_config = secondary_loader(metadata, primary_config)
+
+        if prefer_secondary:
+            return merge([
+                primary_config,
+                secondary_config,
+            ])
+        else:
+            return merge([
+                secondary_config,
+                primary_config,
+            ])
+
+    return loader
 
 
 def load_each(*loaders):

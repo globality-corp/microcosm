@@ -6,8 +6,14 @@ from json import dumps
 
 from hamcrest import assert_that, equal_to, is_
 
+from microcosm.config.model import Configuration
 from microcosm.loaders import load_from_dict
-from microcosm.loaders.compose import load_config_and_secrets, load_each, load_partitioned
+from microcosm.loaders.compose import (
+    load_config_and_secrets,
+    load_each,
+    load_partitioned,
+    two_stage_loader,
+)
 from microcosm.loaders.environment import load_from_environ
 from microcosm.loaders.settings import load_from_json_file
 from microcosm.metadata import Metadata
@@ -31,6 +37,66 @@ def test_load_each():
         "foo": "bar",
         "settings": settings_.name
     })))
+
+
+def secondary_loader(metadata, config):
+    return Configuration({
+        config.foo: "bazman",
+    })
+
+
+def test_two_stage_loader_basic():
+    metadata = Metadata("foo")
+    initial_loader = load_from_dict(
+        foo="bar",
+    )
+
+    loader = two_stage_loader(initial_loader, secondary_loader)
+    config = loader(metadata)
+
+    assert_that(config, is_(equal_to(dict(
+        foo="bar",
+        bar="bazman",
+    ))))
+
+
+def test_two_stage_loader_prefer_primary():
+    metadata = Metadata("foo")
+    initial_loader = load_from_dict(
+        foo="bar",
+        bar="hello",
+    )
+
+    loader = two_stage_loader(
+        initial_loader,
+        secondary_loader,
+        prefer_secondary=False,
+    )
+    config = loader(metadata)
+
+    assert_that(config, is_(equal_to(dict(
+        foo="bar",
+        bar="hello",
+    ))))
+
+
+def test_two_stage_loader_prefer_secondary():
+    metadata = Metadata("foo")
+    initial_loader = load_from_dict(
+        foo="bar",
+        bar="hello",
+    )
+    loader = two_stage_loader(
+        initial_loader,
+        secondary_loader,
+        prefer_secondary=True,
+    )
+    config = loader(metadata)
+
+    assert_that(config, is_(equal_to(dict(
+        foo="bar",
+        bar="bazman",
+    ))))
 
 
 def test_load_partitioned():
