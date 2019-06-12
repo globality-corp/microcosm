@@ -5,6 +5,7 @@ Test loading function composition.
 from json import dumps
 
 from hamcrest import assert_that, equal_to, is_
+
 from microcosm.config.model import Configuration
 from microcosm.loaders import load_from_dict
 from microcosm.loaders.compose import (

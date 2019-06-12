@@ -9,19 +9,13 @@ or from an external service.
 
 """
 from microcosm.config.model import Configuration
-from microcosm.loaders.compose import (  # noqa: F401
-    load_each,
-)
+from microcosm.loaders.compose import load_each  # noqa: F401
 from microcosm.loaders.environment import (  # noqa: F401
     load_from_environ,
     load_from_environ_as_json,
 )
-from microcosm.loaders.keys import (  # noqa: F401
-    expand_config,
-)
-from microcosm.loaders.settings import (  # noqa: F401
-    load_from_json_file,
-)
+from microcosm.loaders.keys import expand_config  # noqa: F401
+from microcosm.loaders.settings import load_from_json_file  # noqa: F401
 
 
 def load_from_dict(dct=None, **kwargs):

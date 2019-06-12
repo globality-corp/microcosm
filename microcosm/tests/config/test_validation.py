@@ -8,7 +8,14 @@ from hamcrest import (
     has_entries,
     raises,
 )
-from microcosm.api import binding, defaults, load_from_dict, required, typed
+
+from microcosm.api import (
+    binding,
+    defaults,
+    load_from_dict,
+    required,
+    typed,
+)
 from microcosm.config.api import configure
 from microcosm.config.types import boolean, comma_separated_list
 from microcosm.errors import ValidationError

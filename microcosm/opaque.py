@@ -18,8 +18,8 @@ Combining opaque data across an entire fleet of services allows for consistent t
 easier debugging of distributed operations.
 
 """
-from contextdecorator import ContextDecorator
 from collections import MutableMapping
+from contextlib import ContextDecorator
 from copy import deepcopy
 from types import MethodType
 

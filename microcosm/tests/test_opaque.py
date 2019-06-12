@@ -2,11 +2,7 @@
 Opaque context tests.
 
 """
-from hamcrest import (
-    assert_that,
-    equal_to,
-    is_,
-)
+from hamcrest import assert_that, equal_to, is_
 
 from microcosm.api import binding, create_object_graph, load_from_dict
 from microcosm.opaque import Opaque
