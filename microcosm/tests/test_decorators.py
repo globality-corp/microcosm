@@ -2,14 +2,10 @@
 Tests for factory decorators
 
 """
-from hamcrest import (
-    assert_that,
-    equal_to,
-    is_,
-)
+from hamcrest import assert_that, equal_to, is_
 
 from microcosm.decorators import binding, defaults
-from microcosm.registry import get_defaults, Registry
+from microcosm.registry import Registry, get_defaults
 
 
 def test_defaults():

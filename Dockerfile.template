@@ -20,7 +20,7 @@ FROM <REPO>/python-library:base-<SHA1>
 # to customize the `dev` and `test` targets.
 
 ENV NAME microcosm
-COPY README.md entrypoint.sh /src/
+COPY entrypoint.sh /src/
 ENTRYPOINT ["./entrypoint.sh"]
 
 # Install source

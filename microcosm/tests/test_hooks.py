@@ -2,10 +2,8 @@
 Test hook invocation.
 
 """
-from hamcrest import (
-    assert_that,
-    contains,
-)
+from hamcrest import assert_that, contains
+
 from microcosm.api import binding, create_object_graph
 from microcosm.hooks import on_resolve
 

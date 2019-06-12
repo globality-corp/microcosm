@@ -15,7 +15,7 @@ from hamcrest import (
     raises,
 )
 
-from microcosm.decorators import defaults, binding
+from microcosm.decorators import binding, defaults
 from microcosm.errors import CyclicGraphError, LockedGraphError
 from microcosm.object_graph import create_object_graph
 from microcosm.registry import Registry
