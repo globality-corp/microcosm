@@ -14,7 +14,7 @@
 defaults: &defaults
   working_directory: ~/repo
   docker:
-    - image: ${AWS_ECR_DOMAIN}/globality-build:2019.20.1
+    - image: ${AWS_ECR_DOMAIN}/globality-build:faaff99432ff46b774e40a2f6a44e628e9955070
       aws_auth:
         aws_access_key_id: ${AWS_ACCESS_KEY_ID}
         aws_secret_access_key: ${AWS_SECRET_ACCESS_KEY}
@@ -28,7 +28,7 @@ defaults: &defaults
 deploy_defaults: &deploy_defaults
   working_directory: ~/repo
   docker:
-    - image: ${AWS_ECR_DOMAIN}/globality-build:2019.20.1
+    - image: ${AWS_ECR_DOMAIN}/globality-build:faaff99432ff46b774e40a2f6a44e628e9955070
       aws_auth:
         aws_access_key_id: ${AWS_ACCESS_KEY_ID}
         aws_secret_access_key: ${AWS_SECRET_ACCESS_KEY}
@@ -144,7 +144,7 @@ jobs:
             version=$(cat .bumpversion.cfg | awk '/current_version / {print $3}')
             python setup.py register -r pypi
             python setup.py sdist
-            twine upload dist/microcosm-${version}.tar.gz
+            twine upload --repository pypi dist/microcosm-${version}.tar.gz
 
 workflows:
   version: 2
