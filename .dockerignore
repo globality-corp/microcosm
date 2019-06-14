@@ -1,6 +1,6 @@
 *
 !microcosm
-microcosm/test*
+microcosm/tests
 !dist/*-none-any.whl
 !entrypoint.sh
 !MANIFEST.in
