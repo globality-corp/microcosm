@@ -14,6 +14,10 @@ def configure_tracing(graph):
     available sampling strategies.
 
     """
+    if graph.metadata.testing:
+        from unittest.mock import Mock
+        return Mock()
+
     config = Config(
         config={
             'sampler': {
