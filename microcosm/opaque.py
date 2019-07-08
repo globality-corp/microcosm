@@ -19,15 +19,18 @@ easier debugging of distributed operations.
 
 """
 from collections import MutableMapping
-from contextlib import ContextDecorator
+from contextlib import ContextDecorator, ExitStack
 from copy import deepcopy
 from types import MethodType
+
+from opentracing_instrumentation.request_context import span_in_context
 
 
 def _make_initializer(opaque):
 
-    class OpaqueInitializer(ContextDecorator):
+    class OpaqueInitializer(ContextDecorator, ExitStack):
         def __init__(self, func, *args, **kwargs):
+            super().__init__()
 
             def member_func(self):
                 return func(*args, **kwargs)
@@ -39,9 +42,17 @@ def _make_initializer(opaque):
             self.saved = deepcopy(opaque._store)
             opaque.update(self.func())
 
+            if opaque.tracer:
+                span = self.enter_context(opaque.tracer.start_span(opaque.name))
+                for key, value in opaque.as_dict().items():
+                    span.set_tag(key, value)
+                # make sure the span is passed down along functions
+                self.enter_context(span_in_context(span))
+
         def __exit__(self, *exc):
             opaque._store = self.saved
             self.saved = None
+            super().__exit__(*exc)
 
     return OpaqueInitializer
 
@@ -69,6 +80,8 @@ class Opaque(MutableMapping):
 
     """
     def __init__(self, *args, **kwargs):
+        self.tracer = kwargs.pop("tracer", None)
+        self.name = kwargs.pop("name", "opaque")
         self._store = dict(*args, **kwargs)
         self.initialize = _make_initializer(self)
 
@@ -92,4 +105,4 @@ class Opaque(MutableMapping):
 
 
 def configure_opaque(graph):
-    return Opaque(graph.config.opaque)
+    return Opaque(graph.config.opaque, tracer=graph.tracer, name=graph.metadata.name)

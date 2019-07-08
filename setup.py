@@ -33,6 +33,7 @@ setup(
         "microcosm.factories": [
             "hello_world = microcosm.example:create_hello_world",
             "opaque = microcosm.opaque:configure_opaque",
+            "tracer = microcosm.tracing:configure_tracing",
         ],
     },
     tests_require=[
