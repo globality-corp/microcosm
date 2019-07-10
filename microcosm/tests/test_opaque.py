@@ -116,7 +116,6 @@ class Child:
         self.opaque = graph.opaque
 
     def __call__(self):
-        print("self.opaque : ", self.opaque.as_dict())
         return self.opaque.as_dict()
 
 

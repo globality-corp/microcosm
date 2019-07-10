@@ -58,7 +58,6 @@ def _make_initializer(opaque):
             initialize a span for this opaque context.
             """
             span_context = opaque.tracer.extract(Format.TEXT_MAP, opaque.as_dict())
-            print("span context: ", span_context)
             span_tags = {tags.SPAN_KIND: tags.SPAN_KIND_RPC_SERVER}
 
             return self.enter_context(
@@ -84,7 +83,6 @@ def _make_initializer(opaque):
             boundaries.
 
             """
-            print("making trace")
             self.enter_context(span_in_context(span))
             span_dict = dict()
             opaque.tracer.inject(span, Format.HTTP_HEADERS, span_dict)
