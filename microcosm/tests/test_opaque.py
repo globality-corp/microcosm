@@ -6,9 +6,9 @@ from hamcrest import (
     assert_that,
     equal_to,
     has_entries,
+    has_key,
     is_,
     not_,
-    has_key,
 )
 
 from microcosm.api import binding, create_object_graph, load_from_dict
