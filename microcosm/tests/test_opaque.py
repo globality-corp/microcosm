@@ -2,7 +2,7 @@
 Opaque context tests.
 
 """
-from hamcrest import assert_that, equal_to, is_
+from hamcrest import assert_that, equal_to, is_, has_entries
 
 from microcosm.api import binding, create_object_graph, load_from_dict
 from microcosm.opaque import Opaque
@@ -133,5 +133,6 @@ def test_collaboration():
     )(graph.parent_collaborator.__call__)
 
     assert_that(graph.opaque.as_dict(), is_(equal_to({THIS: VALUE})))
-    assert_that(decorated_func(), is_(equal_to(example_func(OTHER, OTHER))))
+    # NB: opaque.intialize will also inject some jaeger-related metadata which the tests can ignore.
+    assert_that(decorated_func(), has_entries(example_func(OTHER, OTHER)))
     assert_that(graph.opaque.as_dict(), is_(equal_to({THIS: VALUE})))

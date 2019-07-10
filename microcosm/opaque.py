@@ -44,20 +44,25 @@ def _make_initializer(opaque):
             self.saved = deepcopy(opaque._store)
             opaque.update(self.func())
 
+            # Use of a tracing solution on top of opaque is optional!
             if opaque.tracer:
                 span_context = opaque.tracer.extract(Format.TEXT_MAP, opaque.as_dict())
                 span_tags = {tags.SPAN_KIND: tags.SPAN_KIND_RPC_SERVER}
+
                 span = self.enter_context(
                     opaque.tracer.start_span(
-                        opaque.name,
+                        opaque.get("name", opaque.service_name),
                         child_of=span_context,
                         tags=span_tags,
                     ),
                 )
                 for key, value in opaque.as_dict().items():
                     span.set_tag(key, value)
-                # make sure the span is passed down along functions
+                # make sure the span is passed down
                 self.enter_context(span_in_context(span))
+                span_dict = dict()
+                opaque.tracer.inject(span, Format.HTTP_HEADERS, span_dict)
+                opaque.update(span_dict)
 
         def __exit__(self, *exc):
             opaque._store = self.saved
@@ -91,7 +96,7 @@ class Opaque(MutableMapping):
     """
     def __init__(self, *args, **kwargs):
         self.tracer = kwargs.pop("tracer", None)
-        self.name = kwargs.pop("name", "opaque")
+        self.service_name = kwargs.pop("name", None)
         self._store = dict(*args, **kwargs)
         self.initialize = _make_initializer(self)
 

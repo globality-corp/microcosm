@@ -1,5 +1,3 @@
-from contextlib import nullcontext
-
 from jaeger_client import Config
 
 from microcosm.api import binding, defaults, typed
@@ -16,12 +14,6 @@ def configure_tracing(graph):
     available sampling strategies.
 
     """
-    if graph.metadata.testing:
-        from unittest.mock import Mock
-        mock = Mock()
-        mock.start_span = nullcontext
-        return mock
-
     config = Config(
         config={
             'sampler': {
