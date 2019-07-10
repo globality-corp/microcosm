@@ -23,9 +23,9 @@ from contextlib import ContextDecorator, ExitStack
 from copy import deepcopy
 from types import MethodType
 
-from opentracing_instrumentation.request_context import span_in_context
-from opentracing.propagation import Format
 from opentracing.ext import tags
+from opentracing.propagation import Format
+from opentracing_instrumentation.request_context import span_in_context
 
 
 def _make_initializer(opaque):
@@ -46,23 +46,45 @@ def _make_initializer(opaque):
 
             # Use of a tracing solution on top of opaque is optional!
             if opaque.tracer:
-                span_context = opaque.tracer.extract(Format.TEXT_MAP, opaque.as_dict())
-                span_tags = {tags.SPAN_KIND: tags.SPAN_KIND_RPC_SERVER}
+                span = self.start_span()
+                self.set_tags(span)
+                self.pass_span_context_to_children(span)
 
-                span = self.enter_context(
-                    opaque.tracer.start_span(
-                        opaque.get("span_name", opaque.service_name),
-                        child_of=span_context,
-                        tags=span_tags,
-                    ),
-                )
-                for key, value in opaque.as_dict().items():
-                    span.set_tag(key, value)
-                # make sure the span is passed down
-                self.enter_context(span_in_context(span))
-                span_dict = dict()
-                opaque.tracer.inject(span, Format.HTTP_HEADERS, span_dict)
-                opaque.update(span_dict)
+        def start_span(self):
+            """
+            Extract any existing span context from the graph, and use it to
+            initialize a span for this opaque context.
+            """
+            span_context = opaque.tracer.extract(Format.TEXT_MAP, opaque.as_dict())
+            span_tags = {tags.SPAN_KIND: tags.SPAN_KIND_RPC_SERVER}
+
+            return self.enter_context(
+                opaque.tracer.start_span(
+                    opaque.get("span_name", opaque.service_name),
+                    child_of=span_context,
+                    tags=span_tags,
+                ),
+            )
+
+        def set_tags(self, span):
+            """
+            Copy opaque tags into tracer tags.
+            """
+            for key, value in opaque.as_dict().items():
+                span.set_tag(key, value)
+
+        def pass_span_context_to_children(self, span):
+            """
+            Save span information in jaeger global storage as well as in
+            graph.opaque so it can be passed to children in this process as
+            well as across other processes e.g. over HTTP calls or pubsub
+            boundaries.
+
+            """
+            self.enter_context(span_in_context(span))
+            span_dict = dict()
+            opaque.tracer.inject(span, Format.HTTP_HEADERS, span_dict)
+            opaque.update(span_dict)
 
         def __exit__(self, *exc):
             opaque._store = self.saved
