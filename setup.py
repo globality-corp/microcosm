@@ -22,7 +22,9 @@ setup(
     install_requires=[
         "contextdecorator>=0.10.0",
         "inflection>=0.3.1",
+        "jaeger-client>=4.0.0",
         "lazy>=1.3",
+        "opentracing-instrumentation>=3.0.1",
     ],
     setup_requires=[
         "nose>=1.3.6",
