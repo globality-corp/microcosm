@@ -2,6 +2,9 @@ from jaeger_client import Config
 
 from microcosm.api import binding, defaults, typed
 
+TRACE_ID = "uber-trace-id"
+SPAN_NAME = "span_name"
+
 
 @binding("tracer")
 @defaults(
