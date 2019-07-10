@@ -51,7 +51,7 @@ def _make_initializer(opaque):
 
                 span = self.enter_context(
                     opaque.tracer.start_span(
-                        opaque.get("name", opaque.service_name),
+                        opaque.get("span_name", opaque.service_name),
                         child_of=span_context,
                         tags=span_tags,
                     ),
