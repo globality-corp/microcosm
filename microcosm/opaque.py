@@ -24,6 +24,8 @@ from copy import deepcopy
 from types import MethodType
 
 from opentracing_instrumentation.request_context import span_in_context
+from opentracing.propagation import Format
+from opentracing.ext import tags
 
 
 def _make_initializer(opaque):
@@ -43,7 +45,15 @@ def _make_initializer(opaque):
             opaque.update(self.func())
 
             if opaque.tracer:
-                span = self.enter_context(opaque.tracer.start_span(opaque.name))
+                span_context = opaque.tracer.extract(Format.TEXT_MAP, opaque.as_dict())
+                span_tags = {tags.SPAN_KIND: tags.SPAN_KIND_RPC_SERVER}
+                span = self.enter_context(
+                    opaque.tracer.start_span(
+                        opaque.name,
+                        child_of=span_context,
+                        tags=span_tags,
+                    ),
+                )
                 for key, value in opaque.as_dict().items():
                     span.set_tag(key, value)
                 # make sure the span is passed down along functions
