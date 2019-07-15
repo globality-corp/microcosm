@@ -16,6 +16,7 @@ from microcosm.loaders.environment import (  # noqa: F401
 )
 from microcosm.loaders.keys import expand_config  # noqa: F401
 from microcosm.loaders.settings import load_from_json_file  # noqa: F401
+from microcosm.metadata import Metadata
 
 
 def load_from_dict(dct=None, **kwargs):
@@ -31,5 +32,5 @@ def load_from_dict(dct=None, **kwargs):
     return _load_from_dict
 
 
-def empty_loader(metadata, Metadata):
+def empty_loader(metadata: Metadata):
     return Configuration()
