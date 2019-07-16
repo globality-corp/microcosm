@@ -7,7 +7,7 @@ from json import dumps
 from hamcrest import assert_that, equal_to, is_
 
 from microcosm.config.model import Configuration
-from microcosm.loaders import load_from_dict
+from microcosm.loaders import empty_loader, load_from_dict
 from microcosm.loaders.compose import (
     load_config_and_secrets,
     load_each,
@@ -205,3 +205,15 @@ def test_load_config_and_secrets():
             password="secret",
         ),
     ))))
+
+
+def test_empty_loader():
+    """
+    Return an empty loader.
+
+    """
+    metadata = Metadata("foo")
+    loader = load_each(empty_loader)
+    config = loader(metadata)
+
+    assert_that(config, is_(equal_to({})))
