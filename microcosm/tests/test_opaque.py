@@ -2,7 +2,15 @@
 Opaque context tests.
 
 """
-from hamcrest import assert_that, equal_to, is_
+from hamcrest import (
+    assert_that,
+    equal_to,
+    has_entries,
+    has_key,
+    is_,
+    not_,
+)
+from jaeger_client.constants import TRACE_ID_HEADER
 
 from microcosm.api import binding, create_object_graph, load_from_dict
 from microcosm.opaque import Opaque
@@ -92,28 +100,30 @@ def test_composition():
     assert_that(opaque.as_dict(), is_(equal_to({THIS: VALUE})))
 
 
+# set up a parent collaborator that uses a child collaborator
+@binding("parent_collaborator")
+class Parent:
+    def __init__(self, graph):
+        self.child_collaborator = graph.child_collaborator
+
+    def __call__(self):
+        return self.child_collaborator()
+
+
+@binding("child_collaborator")
+class Child:
+    def __init__(self, graph):
+        self.opaque = graph.opaque
+
+    def __call__(self):
+        return self.opaque.as_dict()
+
+
 def test_collaboration():
     """
     All microcosm collaborators should have access to the same opaque context.
 
     """
-    # set up a parent collaborator that uses a child collaborator
-    @binding("parent_collaborator")
-    class Parent:
-        def __init__(self, graph):
-            self.child_collaborator = graph.child_collaborator
-
-        def __call__(self):
-            return self.child_collaborator()
-
-    @binding("child_collaborator")
-    class Child:
-        def __init__(self, graph):
-            self.opaque = graph.opaque
-
-        def __call__(self):
-            return self.opaque.as_dict()
-
     # create the object graph with both collaborators and opaque data
     graph = create_object_graph(
         "test",
@@ -127,11 +137,14 @@ def test_collaboration():
     )
     graph.lock()
 
+    assert_that(graph.opaque.as_dict(), not_(has_key(TRACE_ID_HEADER)))
     # we should be able to initialize the opaque data and observe it from the collaborators
     decorated_func = graph.opaque.initialize(
         example_func, OTHER, OTHER
     )(graph.parent_collaborator.__call__)
 
     assert_that(graph.opaque.as_dict(), is_(equal_to({THIS: VALUE})))
-    assert_that(decorated_func(), is_(equal_to(example_func(OTHER, OTHER))))
+    # NB: opaque.intialize will also inject some jaeger-related metadata which the tests can ignore.
+    assert_that(decorated_func(), has_entries(example_func(OTHER, OTHER)))
+    assert_that(decorated_func(), has_key(TRACE_ID_HEADER))
     assert_that(graph.opaque.as_dict(), is_(equal_to({THIS: VALUE})))
