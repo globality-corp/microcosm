@@ -137,7 +137,7 @@ def test_collaboration():
     )
     graph.lock()
 
-    assert_that(graph.opaque.as_dict(), not_(has_key(TRACE_ID_HEADER))) 
+    assert_that(graph.opaque.as_dict(), not_(has_key(TRACE_ID_HEADER)))
     # we should be able to initialize the opaque data and observe it from the collaborators
     decorated_func = graph.opaque.initialize(
         example_func, OTHER, OTHER
