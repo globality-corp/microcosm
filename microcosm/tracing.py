@@ -1,9 +1,13 @@
-from jaeger_client import Config
+from jaeger_client.config import (
+    Config,
+    DEFAULT_SAMPLING_PORT,
+    DEFAULT_REPORTING_PORT,
+    DEFAULT_REPORTING_HOST,
+)
 
 from microcosm.api import binding, defaults, typed
 
 
-TRACE_ID = "uber-trace-id"
 SPAN_NAME = "span_name"
 
 
@@ -11,6 +15,9 @@ SPAN_NAME = "span_name"
 @defaults(
     sample_type="ratelimiting",
     sample_param=typed(int, 10),
+    sampling_port=typed(int, DEFAULT_SAMPLING_PORT),
+    reporting_port=typed(int, DEFAULT_REPORTING_PORT),
+    reporting_host=DEFAULT_REPORTING_HOST,
 )
 def configure_tracing(graph):
     """
@@ -20,11 +27,16 @@ def configure_tracing(graph):
     """
     config = Config(
         config={
-            'sampler': {
-                'type': graph.config.tracer.sample_type,
-                'param': graph.config.tracer.sample_param,
+            "sampler": {
+                "type": graph.config.tracer.sample_type,
+                "param": graph.config.tracer.sample_param,
             },
-            'logging': True,
+            "local_agent": {
+                "sampling_port": graph.config.tracer.sampling_port,
+                "reporting_port": graph.config.tracer.reporting_port,
+                "reporting_host": graph.config.tracer.reporting_host,
+            },
+            "logging": True,
         },
         service_name=graph.metadata.name,
     )
