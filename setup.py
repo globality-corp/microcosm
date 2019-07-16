@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 
 
 project = "microcosm"
-version = "2.9.0"
+version = "2.10.0"
 
 setup(
     name=project,
