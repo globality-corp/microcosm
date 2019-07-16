@@ -1,8 +1,8 @@
 from jaeger_client.config import (
-    Config,
-    DEFAULT_SAMPLING_PORT,
-    DEFAULT_REPORTING_PORT,
     DEFAULT_REPORTING_HOST,
+    DEFAULT_REPORTING_PORT,
+    DEFAULT_SAMPLING_PORT,
+    Config,
 )
 
 from microcosm.api import binding, defaults, typed
