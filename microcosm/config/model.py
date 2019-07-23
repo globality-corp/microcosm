@@ -2,6 +2,8 @@
 Configuration modeling, loading, and validation.
 
 """
+from warnings import warn
+
 from microcosm.errors import ValidationError
 
 
@@ -74,7 +76,16 @@ class Requirement:
     A value type for configuration defaults that represents *expected* config.
 
     """
-    def __init__(self, type=str, default_value=None, mock_value=None, required=True, *args, **kwargs):
+    def __init__(
+        self,
+        type=str,
+        default_value=None,
+        mock_value=None,
+        required=True,
+        default_factory=None,
+        *args,
+        **kwargs,
+    ):
         """
         :param type: a type callable
         :param mock_value: a default value to use durint testing (only)
@@ -82,8 +93,44 @@ class Requirement:
         """
         self.type = type
         self.default_value = default_value
+        self.default_factory = default_factory
         self.mock_value = mock_value
         self.required = required
+
+        # Warn when the user doesn't provide exactly one of
+        #
+        # [`required=True`, `default_value=...`]
+        #
+        # In the future this will be an error, but for now we just warn in
+        # those situations which could occur as of the time this was introduced
+        warned = False
+        if default_factory is None:
+            if required and (default_value is not None):
+                warned = True
+                warn(
+                    "Cannot specify default value when `required=True`.",
+                    category=FutureWarning,
+                )
+            if not required and default_value is None:
+                warned = True
+                warn(
+                    "Must either specify `required=True` or provide default value.",
+                    category=FutureWarning,
+                )
+
+        # For all situations where user doesn't provide exactly one of
+        #
+        # [`required=True`, `default_value=...`, `default_factory=...`]
+        #
+        # and it's using newly introduced features, we error, so that new
+        # issues can't be introduced going forward.  In the future, we will
+        # just perform this check and remove the warning above
+        if not warned and len(list(filter(None, [default_value, default_factory, required]))) != 1:
+            raise ValueError(
+                "Expected exactly one of "
+                "[default_value, default_factory, required], "
+                f"but got {[default_value, default_factory, required]}"
+            )
 
     def validate(self, metadata, path, value):
         """
@@ -96,6 +143,8 @@ class Requirement:
                 value = self.mock_value
             elif self.default_value is not None:
                 value = self.default_value
+            elif self.default_factory is not None:
+                value = self.default_factory()
             elif not value.required:
                 return None
             else:
@@ -103,5 +152,5 @@ class Requirement:
 
         try:
             return self.type(value)
-        except ValueError:
+        except (ValueError, TypeError):
             raise ValidationError(f"Missing required configuration for: {'.'.join(path)}: {value}")
