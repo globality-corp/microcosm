@@ -188,7 +188,7 @@ class TestValidation:
             ),
         ))
 
-    @check_requirements_exactly_one_warning("Must either")
+    @check_requirements_exactly_one_warning()
     def test_missing_default(self):
         self.create_fixture(typed(int))
         loader = load_from_dict()
@@ -200,7 +200,7 @@ class TestValidation:
             ),
         ))
 
-    @check_requirements_exactly_one_warning("Cannot specify")
+    @check_requirements_exactly_one_warning()
     def test_default_and_required(self):
         self.create_fixture(required(int, default_value="1"))
         loader = load_from_dict()

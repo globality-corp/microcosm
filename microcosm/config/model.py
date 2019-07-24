@@ -101,31 +101,23 @@ class Requirement:
         #
         # [`required=True`, `default_value=...`]
         #
-        # In the future this will be an error, but for now we just warn in
-        # those situations which could occur as of the time this was introduced
-        warned = False
-        if default_factory is None:
-            if required and (default_value is not None):
-                warned = True
-                warn(
-                    "Cannot specify default value when `required=True`.",
-                    category=FutureWarning,
-                )
-            if not required and default_value is None:
-                warned = True
-                warn(
-                    "Must either specify `required=True` or provide default value.",
-                    category=FutureWarning,
-                )
-
-        # For all situations where user doesn't provide exactly one of
-        #
-        # [`required=True`, `default_value=...`, `default_factory=...`]
-        #
-        # and it's using newly introduced features, we error, so that new
-        # issues can't be introduced going forward.  In the future, we will
-        # just perform this check and remove the warning above
-        if not warned and len(list(filter(None, [default_value, default_factory, required]))) != 1:
+        # When the user is not using `default_factory`, this could be legacy
+        # code, so we just warn. In the future this will be an error, but for
+        # now we just warn in those situations which could occur as of the time
+        # this was introduced
+        if default_factory is None and required == (default_value is not None):
+            warn(
+                "Must either specify `required=True` or provide default value.",
+                category=FutureWarning,
+            )
+        elif len(list(filter(None, [default_value, default_factory, required]))) != 1:
+            # For all situations where user doesn't provide exactly one of
+            #
+            # [`required=True`, `default_value=...`, `default_factory=...`]
+            #
+            # and it's using newly introduced features, we error, so that new
+            # issues can't be introduced going forward.  In the future, we will
+            # just perform this check and remove the warning above
             raise ValueError(
                 "Expected exactly one of "
                 "[default_value, default_factory, required], "
