@@ -71,6 +71,18 @@ class TestValidation:
         ))
 
     @check_no_warnings()
+    def test_false_default(self):
+        self.create_fixture(typed(bool, default_value=False))
+        loader = load_from_dict()
+
+        config = configure(self.registry.defaults, self.metadata, loader)
+        assert_that(config, has_entries(
+            foo=has_entries(
+                value=False,
+            ),
+        ))
+
+    @check_no_warnings()
     def test_valid_default_factory(self):
         self.create_fixture(typed(list, default_factory=list))
         loader = load_from_dict()
