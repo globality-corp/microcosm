@@ -110,13 +110,16 @@ class Requirement:
                 "Must either specify `required=True` or provide default value.",
                 category=FutureWarning,
             )
-        elif len(
-            list(filter(None, [
-                required,
+        elif any([
+            required and any([
                 default_value is not None,
                 default_factory is not None,
-            ])),
-        ) != 1:
+            ]),
+            all([
+                default_factory is not None,
+                default_value is not None,
+            ]),
+        ]):
             # For all situations where user doesn't provide exactly one of
             #
             # [`required=True`, `default_value=...`, `default_factory=...`]
