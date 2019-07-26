@@ -4,6 +4,7 @@ Configuration modeling, loading, and validation.
 """
 from warnings import warn
 
+from microcosm.config.sentinel import UNSET
 from microcosm.errors import ValidationError
 
 
@@ -79,10 +80,11 @@ class Requirement:
     def __init__(
         self,
         type=str,
-        default_value=None,
-        mock_value=None,
+        default_value=UNSET,
+        mock_value=UNSET,
         required=True,
         default_factory=None,
+        nullable=False,
         *args,
         **kwargs,
     ):
@@ -96,6 +98,7 @@ class Requirement:
         self.default_factory = default_factory
         self.mock_value = mock_value
         self.required = required
+        self.nullable = nullable
 
         # Warn when the user doesn't provide exactly one of
         #
@@ -105,19 +108,19 @@ class Requirement:
         # code, so we just warn. In the future this will be an error, but for
         # now we just warn in those situations which could occur as of the time
         # this was introduced
-        if default_factory is None and required == (default_value is not None):
+        if default_factory is None and required == (default_value is not UNSET):
             warn(
                 "Must either specify `required=True` or provide default value.",
                 category=FutureWarning,
             )
         elif any([
             required and any([
-                default_value is not None,
+                default_value is not UNSET,
                 default_factory is not None,
             ]),
             all([
+                default_value is not UNSET,
                 default_factory is not None,
-                default_value is not None,
             ]),
         ]):
             # For all situations where user doesn't provide exactly one of
@@ -140,9 +143,9 @@ class Requirement:
         """
         if isinstance(value, Requirement):
             # if the RHS is still a Requirement object, it was not set
-            if metadata.testing and self.mock_value is not None:
+            if metadata.testing and self.mock_value is not UNSET:
                 value = self.mock_value
-            elif self.default_value is not None:
+            elif self.default_value is not UNSET:
                 value = self.default_value
             elif self.default_factory is not None:
                 value = self.default_factory()
@@ -152,6 +155,9 @@ class Requirement:
                 raise ValidationError(f"Missing required configuration for: {'.'.join(path)}")
 
         try:
+            if value is None and self.nullable:
+                return value
+
             return self.type(value)
         except (ValueError, TypeError):
             raise ValidationError(f"Missing required configuration for: {'.'.join(path)}: {value}")
