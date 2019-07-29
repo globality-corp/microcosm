@@ -100,6 +100,13 @@ class Requirement:
         self.required = required
         self.nullable = nullable or (default_value is None)
 
+        if kwargs:
+            warn(
+                f"Unsupported `Requirement` args {kwargs}.  "
+                "Support for arbitrary arguments to `Requirement` will be dropped",
+                category=FutureWarning,
+            )
+
         if default_factory is None and required == (default_value is not UNSET):
             # Warn when the user doesn't provide exactly one of
             #

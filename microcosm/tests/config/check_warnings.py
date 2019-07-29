@@ -12,7 +12,7 @@ from hamcrest import (
 
 
 @contextmanager
-def check_requirements_exactly_one_warning():
+def check_warning(message):
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
 
@@ -21,8 +21,16 @@ def check_requirements_exactly_one_warning():
         assert_that(w, has_length(1))
         warning = w[-1]
 
-        assert_that(str(warning.message), contains_string("Must either"))
+        assert_that(str(warning.message), contains_string(message))
         assert_that(warning.category, is_(equal_to(FutureWarning)))
+
+
+def check_requirements_exactly_one_warning():
+    return check_warning("Must either")
+
+
+def check_unsupported_arg_warning():
+    return check_warning("Unsupported")
 
 
 @contextmanager

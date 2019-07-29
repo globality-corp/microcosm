@@ -25,6 +25,7 @@ from microcosm.registry import Registry
 from microcosm.tests.config.check_warnings import (
     check_no_warnings,
     check_requirements_exactly_one_warning,
+    check_unsupported_arg_warning,
 )
 
 
@@ -267,6 +268,19 @@ class TestValidation:
         assert_that(config, has_entries(
             foo=has_entries(
                 value=1,
+            ),
+        ))
+
+    @check_unsupported_arg_warning()
+    def test_unsupported_arg(self):
+        self.create_fixture(required(int, mock_value=0, spaghetti="foo"))
+        loader = load_from_dict()
+
+        metadata = Metadata("test", testing=True)
+        config = configure(self.registry.defaults, metadata, loader)
+        assert_that(config, has_entries(
+            foo=has_entries(
+                value=0,
             ),
         ))
 
