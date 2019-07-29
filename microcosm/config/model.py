@@ -100,24 +100,35 @@ class Requirement:
         self.required = required
         self.nullable = nullable
 
-        # Warn when the user doesn't provide exactly one of
-        #
-        # [`required=True`, `default_value=...`]
-        #
-        # When the user is not using `default_factory`, this could be legacy
-        # code, so we just warn. In the future this will be an error, but for
-        # now we just warn in those situations which could occur as of the time
-        # this was introduced
         if default_factory is None and required == (default_value is not UNSET):
+            # Warn when the user doesn't provide exactly one of
+            #
+            # [`required=True`, `default_value=...`]
+            #
+            # When the user is not using `default_factory`, this could be legacy
+            # code, so we just warn. In the future we will remove this clause
+            # and just use the error clause below, but for now we just warn in
+            # those situations which could occur as of the time this was
+            # introduced
             warn(
                 "Must either specify `required=True` or provide default value.",
                 category=FutureWarning,
             )
         elif any([
+            # Must either require a value or provide a default
+            all([
+                not required,
+                default_value is UNSET,
+                default_factory is None,
+            ]),
+
+            # Can't require a value and also specify a default
             required and any([
                 default_value is not UNSET,
                 default_factory is not None,
             ]),
+
+            # Can't specify both a default value and a default factory
             all([
                 default_value is not UNSET,
                 default_factory is not None,
