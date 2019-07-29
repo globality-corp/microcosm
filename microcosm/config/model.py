@@ -98,7 +98,7 @@ class Requirement:
         self.default_factory = default_factory
         self.mock_value = mock_value
         self.required = required
-        self.nullable = nullable
+        self.nullable = nullable or (default_value is None)
 
         if default_factory is None and required == (default_value is not UNSET):
             # Warn when the user doesn't provide exactly one of
