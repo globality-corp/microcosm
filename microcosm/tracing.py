@@ -6,6 +6,7 @@ from jaeger_client.config import (
 )
 
 from microcosm.api import binding, defaults, typed
+from microcosm.config.types import boolean
 
 
 SPAN_NAME = "span_name"
@@ -18,6 +19,7 @@ SPAN_NAME = "span_name"
     sampling_port=typed(int, DEFAULT_SAMPLING_PORT),
     reporting_port=typed(int, DEFAULT_REPORTING_PORT),
     reporting_host=DEFAULT_REPORTING_HOST,
+    logging_enabled=typed(boolean, False),
 )
 def configure_tracing(graph):
     """
@@ -36,7 +38,7 @@ def configure_tracing(graph):
                 "reporting_port": graph.config.tracer.reporting_port,
                 "reporting_host": graph.config.tracer.reporting_host,
             },
-            "logging": True,
+            "logging": graph.config.tracer.logging_enabled,
         },
         service_name=graph.metadata.name,
     )
