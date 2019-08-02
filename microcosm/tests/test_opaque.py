@@ -128,7 +128,11 @@ def test_collaboration():
     graph = create_object_graph(
         "test",
         testing=True,
-        loader=load_from_dict(opaque={THIS: VALUE}))
+        loader=load_from_dict(
+            opaque={THIS: VALUE},
+            tracer={"enabled": True},
+        )
+    )
 
     graph.use(
         "child_collaborator",
@@ -144,7 +148,7 @@ def test_collaboration():
     )(graph.parent_collaborator.__call__)
 
     assert_that(graph.opaque.as_dict(), is_(equal_to({THIS: VALUE})))
-    # NB: opaque.intialize will also inject some jaeger-related metadata which the tests can ignore.
+    # NB: opaque.initialize will also inject some jaeger-related metadata which the tests can ignore.
     assert_that(decorated_func(), has_entries(example_func(OTHER, OTHER)))
     assert_that(decorated_func(), has_key(TRACE_ID_HEADER))
     assert_that(graph.opaque.as_dict(), is_(equal_to({THIS: VALUE})))
