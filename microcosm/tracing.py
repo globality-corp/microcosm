@@ -14,6 +14,7 @@ SPAN_NAME = "span_name"
 
 @binding("tracer")
 @defaults(
+    enabled=typed(boolean, default=False),
     sample_type="ratelimiting",
     sample_param=typed(int, 10),
     sampling_port=typed(int, DEFAULT_SAMPLING_PORT),
@@ -27,19 +28,22 @@ def configure_tracing(graph):
     available sampling strategies.
 
     """
-    config = Config(
-        config={
-            "sampler": {
-                "type": graph.config.tracer.sample_type,
-                "param": graph.config.tracer.sample_param,
+    if graph.config.tracer.enabled:
+        config = Config(
+            config={
+                "sampler": {
+                    "type": graph.config.tracer.sample_type,
+                    "param": graph.config.tracer.sample_param,
+                },
+                "local_agent": {
+                    "sampling_port": graph.config.tracer.sampling_port,
+                    "reporting_port": graph.config.tracer.reporting_port,
+                    "reporting_host": graph.config.tracer.reporting_host,
+                },
+                "logging": graph.config.tracer.logging_enabled,
             },
-            "local_agent": {
-                "sampling_port": graph.config.tracer.sampling_port,
-                "reporting_port": graph.config.tracer.reporting_port,
-                "reporting_host": graph.config.tracer.reporting_host,
-            },
-            "logging": graph.config.tracer.logging_enabled,
-        },
-        service_name=graph.metadata.name,
-    )
-    return config.initialize_tracer()
+            service_name=graph.metadata.name,
+        )
+        return config.initialize_tracer()
+
+    return None
