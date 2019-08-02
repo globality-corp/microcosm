@@ -27,7 +27,6 @@ def configure_tracing(graph):
     available sampling strategies.
 
     """
-    print(graph.config.tracer.enabled)
     if graph.config.tracer.enabled:
         config = Config(
             config={
