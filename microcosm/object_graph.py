@@ -191,3 +191,15 @@ def create_object_graph(name,
         cache=cache,
         loader=loader,
     )
+
+
+def get_component_name(graph: ObjectGraph, component) -> str:
+    """
+    Given an object that is attached to the graph, it returns the object name.
+
+    """
+    return next(
+        key
+        for key, possible_component in graph.items()
+        if possible_component == component
+    )
