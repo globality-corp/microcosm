@@ -15,6 +15,7 @@ from hamcrest import (
     raises,
 )
 
+from microcosm.api import get_component_name
 from microcosm.decorators import binding, defaults
 from microcosm.errors import CyclicGraphError, LockedGraphError
 from microcosm.object_graph import create_object_graph
@@ -149,3 +150,20 @@ def test_object_graph_cycle():
 
     graph = create_object_graph("test", registry=registry)
     assert_that(calling(graph.use).with_args("cycle"), raises(CyclicGraphError))
+
+
+def test_get_component_name_function():
+    """
+    Utility function `get_component_name` works.
+
+    """
+    graph = create_object_graph(
+        name="test",
+    )
+    graph.use("parent")
+    graph.lock()
+
+    assert_that(
+        get_component_name(graph, graph.parent),
+        is_(equal_to("parent"))
+    )
