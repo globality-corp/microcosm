@@ -27,7 +27,7 @@ from opentracing.ext import tags
 from opentracing.propagation import Format
 from opentracing_instrumentation.request_context import span_in_context
 
-from microcosm.tracing import SPAN_NAME, OPAQUE_KEY_WHITE_LIST
+from microcosm.tracing import OPAQUE_KEY_WHITE_LIST, SPAN_NAME
 
 
 def _make_initializer(opaque):
