@@ -4,12 +4,18 @@ from jaeger_client.config import (
     DEFAULT_SAMPLING_PORT,
     Config,
 )
+from jaeger_client.constants import TRACE_ID_HEADER
 
 from microcosm.api import binding, defaults, typed
 from microcosm.config.types import boolean
 
 
 SPAN_NAME = "span_name"
+OPAQUE_KEY_WHITE_LIST = [
+    "x-request-user",
+    "x-request-id",
+    TRACE_ID_HEADER,
+]
 
 
 @binding("tracer")

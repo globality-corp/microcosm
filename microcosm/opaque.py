@@ -27,7 +27,7 @@ from opentracing.ext import tags
 from opentracing.propagation import Format
 from opentracing_instrumentation.request_context import span_in_context
 
-from microcosm.tracing import SPAN_NAME
+from microcosm.tracing import OPAQUE_KEY_WHITE_LIST, SPAN_NAME
 
 
 def _make_initializer(opaque):
@@ -73,7 +73,8 @@ def _make_initializer(opaque):
             Copy opaque tags into tracer tags.
             """
             for key, value in opaque.as_dict().items():
-                span.set_tag(key, value)
+                if key.lower() in OPAQUE_KEY_WHITE_LIST:
+                    span.set_tag(key, value)
 
         def pass_span_context_to_children(self, span):
             """
