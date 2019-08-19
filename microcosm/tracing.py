@@ -20,7 +20,7 @@ OPAQUE_KEY_WHITE_LIST = [
 
 @binding("tracer")
 @defaults(
-    enabled=typed(boolean, default=False),
+    enabled=typed(boolean, default_value=False),
     sample_type="ratelimiting",
     sample_param=typed(int, 10),
     sampling_port=typed(int, DEFAULT_SAMPLING_PORT),
