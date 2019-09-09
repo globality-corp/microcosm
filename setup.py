@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 
 
 project = "microcosm"
-version = "2.12.2"
+version = "2.13.0"
 
 setup(
     name=project,
@@ -22,13 +22,9 @@ setup(
     install_requires=[
         "contextdecorator>=0.10.0",
         "inflection>=0.3.1",
-        # There is a competing upper version requirement for tornado
-        # between jaeger and open-tracing, the latter of which allows up to 6
-        # while jaeger 4.0 only allows up to 5.
-        "tornado<5",
-        "jaeger-client>=4.0.0",
+        "jaeger-client>=4.1.0",
         "lazy>=1.3",
-        "opentracing-instrumentation>=3.0.1",
+        "opentracing-instrumentation>=3.2.0",
     ],
     setup_requires=[
         "nose>=1.3.6",
