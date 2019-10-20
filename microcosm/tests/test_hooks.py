@@ -19,12 +19,18 @@ class Foo:
         self.callbacks = []
 
 
+@binding("subfoo")
+class SubFoo(Foo):
+    pass
+
+
 @binding("bar")
 def new_foo(graph):
     return Foo(graph)
 
 
 on_resolve(Foo, foo_hook, "baz")
+on_resolve(SubFoo, foo_hook, "qux")
 
 
 class TestHooks:
@@ -53,6 +59,20 @@ class TestHooks:
         graph.lock()
 
         assert_that(graph.foo.callbacks, contains("baz"))
+
+    def test_on_resolve_foo_subfoo(self):
+        """
+        If we have two components, and one is a subclass of the other's class, we should
+        still have isolation of the hooks between them
+
+        """
+        graph = create_object_graph("test")
+        graph.use("foo")
+        graph.use("subfoo")
+        graph.lock()
+
+        assert_that(graph.foo.callbacks, contains("baz"))
+        assert_that(graph.subfoo.callbacks, contains("qux"))
 
     def test_on_resolve_bar_once(self):
         """
