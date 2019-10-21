@@ -42,15 +42,20 @@ graph load time:
 ON_RESOLVE = "_microcosm_on_resolve_"
 
 
-def _invoke_hook(hook_name, target):
+def _get_hook_name(hook_prefix, target_cls):
+    return f"{hook_prefix}_{target_cls.__name__}"
+
+
+def _invoke_hook(hook_prefix, target_component):
     """
     Generic hook invocation.
 
     """
+    hook_name = _get_hook_name(hook_prefix, target_component.__class__)
     try:
-        for value in getattr(target, hook_name):
+        for value in getattr(target_component, hook_name):
             func, args, kwargs = value
-            func(target, *args, **kwargs)
+            func(target_component, *args, **kwargs)
     except AttributeError:
         # no hook defined
         pass
@@ -59,16 +64,17 @@ def _invoke_hook(hook_name, target):
         pass
 
 
-def _register_hook(hook_name, target, func, *args, **kwargs):
+def _register_hook(hook_prefix, target_cls, func, *args, **kwargs):
     """
     Generic hook registration.
 
     """
+    hook_name = _get_hook_name(hook_prefix, target_cls)
     call = (func, args, kwargs)
     try:
-        getattr(target, hook_name).append(call)
+        getattr(target_cls, hook_name).append(call)
     except AttributeError:
-        setattr(target, hook_name, [call])
+        setattr(target_cls, hook_name, [call])
 
 
 def invoke_resolve_hook(target):
