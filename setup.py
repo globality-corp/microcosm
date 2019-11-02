@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 from setuptools import find_packages, setup
 
-
 project = "microcosm"
-version = "2.13.1"
+
+exec(open(f"{project}/version.py").read())
 
 setup(
     name=project,
-    version=version,
+    version=__version__,
     description="Microcosm - Simple microservice configuration",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
