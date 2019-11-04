@@ -47,5 +47,5 @@ Once you have a copy of the source, you can install it with:
     $ python setup.py install
 
 
-.. _Github repo: https://github.com/piercefreeman/microcosm
+.. _Github repo: https://github.com/globality-corp/microcosm
 .. _tarball: https://github.com/piercefreeman/microcosm/tarball/master
