@@ -38,7 +38,7 @@ Or download the `tarball`_:
 
 .. code-block:: console
 
-    $ curl -OJL https://github.com/piercefreeman/microcosm/tarball/master
+    $ curl -OJL https://github.com/globality-corp/microcosm/tarball/master
 
 Once you have a copy of the source, you can install it with:
 
