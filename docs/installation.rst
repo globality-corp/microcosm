@@ -32,7 +32,7 @@ You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git://github.com/piercefreeman/microcosm
+    $ git clone git://github.com/globality-corp/microcosm
 
 Or download the `tarball`_:
 
