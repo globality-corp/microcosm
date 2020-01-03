@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 
 
 project = "microcosm"
-version = "2.13.1"
+version = "2.13.2"
 
 setup(
     name=project,
@@ -25,6 +25,7 @@ setup(
         "jaeger-client>=4.1.0",
         "lazy>=1.3",
         "opentracing-instrumentation>=3.2.0",
+        "tornado<6",
     ],
     setup_requires=[
         "nose>=1.3.6",
