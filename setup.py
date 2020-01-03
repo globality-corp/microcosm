@@ -25,6 +25,7 @@ setup(
         "jaeger-client>=4.1.0",
         "lazy>=1.3",
         "opentracing-instrumentation>=3.2.0",
+        "tornado<6",
     ],
     setup_requires=[
         "nose>=1.3.6",
