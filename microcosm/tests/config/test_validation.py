@@ -247,6 +247,38 @@ class TestValidation:
             ),
         ))
 
+    @check_no_warnings()
+    def test_boolean_typed_converted(self):
+        self.create_fixture(typed(bool, default_value=None))
+        loader = load_from_dict(
+            foo=dict(
+                value="False",
+            ),
+        )
+
+        config = configure(self.registry.defaults, self.metadata, loader)
+        assert_that(config, has_entries(
+            foo=has_entries(
+                value=False,
+            ),
+        ))
+
+    @check_no_warnings()
+    def test_lowercase_boolean_typed_converted(self):
+        self.create_fixture(typed(bool, default_value=None))
+        loader = load_from_dict(
+            foo=dict(
+                value="false",
+            ),
+        )
+
+        config = configure(self.registry.defaults, self.metadata, loader)
+        assert_that(config, has_entries(
+            foo=has_entries(
+                value=False,
+            ),
+        ))
+
     @check_requirements_exactly_one_warning()
     def test_missing_default(self):
         self.create_fixture(typed(int))

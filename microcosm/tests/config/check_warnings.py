@@ -13,13 +13,13 @@ from hamcrest import (
 
 @contextmanager
 def check_warning(message):
-    with warnings.catch_warnings(record=True) as w:
+    with warnings.catch_warnings(record=True) as caught_warnings:
         warnings.simplefilter("always")
 
         yield
 
-        assert_that(w, has_length(1))
-        warning = w[-1]
+        assert_that(caught_warnings, has_length(1))
+        warning = caught_warnings[-1]
 
         assert_that(str(warning.message), contains_string(message))
         assert_that(warning.category, is_(equal_to(FutureWarning)))
@@ -35,10 +35,11 @@ def check_unsupported_arg_warning():
 
 @contextmanager
 def check_no_warnings():
-    with warnings.catch_warnings(record=True) as w:
+    with warnings.catch_warnings(record=True) as caught_warnings:
         warnings.simplefilter("always")
 
         yield
 
-        if w:
-            assert_that(w, is_(empty()), w[-1].message)
+        caught_warnings = [warning for warning in caught_warnings if "virtualenvs" not in warning.filename]
+        if caught_warnings:
+            assert_that(caught_warnings, is_(empty()), caught_warnings[-1].message)
