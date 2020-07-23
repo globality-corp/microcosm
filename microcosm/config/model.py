@@ -5,6 +5,7 @@ Configuration modeling, loading, and validation.
 from warnings import warn
 
 from microcosm.config.sentinel import UNSET
+from microcosm.config.types import boolean
 from microcosm.errors import ValidationError
 
 
@@ -154,6 +155,11 @@ class Requirement:
                 f"but got {[default_value, default_factory, required]}"
             )
 
+    def _cast_to_type(self, value):
+        if self.type == bool:
+            return boolean(value)
+        return self.type(value)
+
     def validate(self, metadata, path, value):
         """
         Validate this requirement.
@@ -176,6 +182,6 @@ class Requirement:
             if value is None and self.nullable:
                 return value
 
-            return self.type(value)
+            return self._cast_to_type(value)
         except (ValueError, TypeError):
             raise ValidationError(f"Missing required configuration for: {'.'.join(path)}: {value}")
