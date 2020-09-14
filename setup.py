@@ -22,10 +22,7 @@ setup(
     install_requires=[
         "contextdecorator>=0.10.0",
         "inflection>=0.3.1",
-        "jaeger-client>=4.1.0",
         "lazy>=1.3",
-        "opentracing-instrumentation>=3.2.0",
-        "tornado<6",
     ],
     setup_requires=[
         "nose>=1.3.6",
@@ -36,7 +33,6 @@ setup(
         "microcosm.factories": [
             "hello_world = microcosm.example:create_hello_world",
             "opaque = microcosm.opaque:configure_opaque",
-            "tracer = microcosm.tracing:configure_tracing",
         ],
     },
     tests_require=[
