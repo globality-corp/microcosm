@@ -6,11 +6,8 @@ from hamcrest import (
     assert_that,
     equal_to,
     has_entries,
-    has_key,
     is_,
-    not_,
 )
-from jaeger_client.constants import TRACE_ID_HEADER
 
 from microcosm.api import binding, create_object_graph, load_from_dict
 from microcosm.opaque import Opaque
@@ -141,7 +138,6 @@ def test_collaboration():
     )
     graph.lock()
 
-    assert_that(graph.opaque.as_dict(), not_(has_key(TRACE_ID_HEADER)))
     # we should be able to initialize the opaque data and observe it from the collaborators
     decorated_func = graph.opaque.initialize(
         example_func, OTHER, OTHER
@@ -150,5 +146,4 @@ def test_collaboration():
     assert_that(graph.opaque.as_dict(), is_(equal_to({THIS: VALUE})))
     # NB: opaque.initialize will also inject some jaeger-related metadata which the tests can ignore.
     assert_that(decorated_func(), has_entries(example_func(OTHER, OTHER)))
-    assert_that(decorated_func(), has_key(TRACE_ID_HEADER))
     assert_that(graph.opaque.as_dict(), is_(equal_to({THIS: VALUE})))
