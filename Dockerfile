@@ -11,7 +11,33 @@
 #
 #
 
-FROM <DEPSIMAGE>
+# ----------- deps -----------
+# Install from Debian Stretch with modern Python support
+FROM python:slim-stretch as deps
+
+#
+# Most services will use the same set of packages here, though a few will install
+# custom dependencies for native requirements.
+#
+
+ARG EXTRA_INDEX_URL
+ENV EXTRA_INDEX_URL ${EXTRA_INDEX_URL}
+
+ENV CORE_PACKAGES locales
+ENV BUILD_PACKAGES build-essential libffi-dev
+ENV OTHER_PACKAGES libssl-dev
+
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ${CORE_PACKAGES} ${BUILD_PACKAGES} && \
+    apt-get install -y --no-install-recommends ${OTHER_PACKAGES} && \
+    apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/*
+
+
+# ----------- base -----------
+
+FROM deps as base
 
 # Install dependencies
 #
@@ -53,8 +79,34 @@ ENV LC_ALL en_US.UTF-8
 
 COPY README.md MANIFEST.in setup.cfg setup.py /src/
 
-RUN pip install --upgrade --extra-index-url ${EXTRA_INDEX_URL} /src/ && \
+RUN pip install --no-cache-dir --upgrade --extra-index-url ${EXTRA_INDEX_URL} /src/ && \
     apt-get remove --purge -y ${BUILD_PACKAGES} && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*
 
+
+# ----------- final -----------
+FROM base
+
+# Setup invocation
+#
+# We expose the application on the standard HTTP port and use an entrypoint
+# to customize the `dev` and `test` targets.
+
+ENV NAME microcosm
+COPY entrypoint.sh /src/
+ENTRYPOINT ["./entrypoint.sh"]
+
+# Install source
+#
+# We should not need to reinstall dependencies here, but we do need to import
+# the distribution properly. We also save build arguments to the image using
+# microcosm-compatible environment variables.
+
+
+ARG BUILD_NUM
+ARG SHA1
+ENV MICROCOSM__BUILD_INFO_CONVENTION__BUILD_NUM ${BUILD_NUM}
+ENV MICROCOSM__BUILD_INFO_CONVENTION__SHA1 ${SHA1}
+COPY $NAME /src/$NAME/
+RUN pip install --no-cache-dir --extra-index-url $EXTRA_INDEX_URL -e .
