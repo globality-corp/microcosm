@@ -14,7 +14,7 @@
 defaults: &defaults
   working_directory: ~/repo
   docker:
-    - image: ${AWS_ECR_DOMAIN}/globality-build:2019.41.70
+    - image: ${AWS_ECR_DOMAIN}/globality-build:2020.36.100
       aws_auth:
         aws_access_key_id: ${AWS_ACCESS_KEY_ID}
         aws_secret_access_key: ${AWS_SECRET_ACCESS_KEY}
@@ -28,7 +28,7 @@ defaults: &defaults
 deploy_defaults: &deploy_defaults
   working_directory: ~/repo
   docker:
-    - image: ${AWS_ECR_DOMAIN}/globality-build:2019.41.70
+    - image: ${AWS_ECR_DOMAIN}/globality-build:2020.36.100
       aws_auth:
         aws_access_key_id: ${AWS_ACCESS_KEY_ID}
         aws_secret_access_key: ${AWS_SECRET_ACCESS_KEY}
@@ -38,6 +38,7 @@ deploy_defaults: &deploy_defaults
         JFROG_AUTH: "InjectedDuringRuntime"
         PYPI_USERNAME: "InjectedDuringRuntime"
         PYPI_PASSWORD: "InjectedDuringRuntime"
+
 
 whitelist: &whitelist
   paths:
@@ -56,22 +57,34 @@ jobs:
           root: ~/repo
           <<: *whitelist
 
-  build_base_docker:
+  build_docker:
     <<: *defaults
 
     steps:
       - attach_workspace:
           at: ~/repo
 
-      - setup_remote_docker
+      - setup_remote_docker:
+          docker_layer_caching: true
 
       - run:
-          name: Build Base Docker
-          # install dependencies for loading ecs task definitions
+          name: Login AWS ECR
           command: |
             eval $(aws ecr get-login --no-include-email)
-            globality-build build-gen local
-            globality-build docker-build-push --repo python-library
+      - run:
+          name: Build Docker - Application Service Code
+          command: |
+            # pwd is here to prevent error when pre_docker_build returns nothing
+            pwd
+
+
+            docker build --tag $AWS_ECR_DOMAIN/python-library:$CIRCLE_SHA1 \
+              --build-arg BUILD_NUM=$CIRCLE_BUILD_NUM \
+              --build-arg SHA1=$CIRCLE_SHA1 \
+              --build-arg EXTRA_INDEX_URL=$EXTRA_INDEX_URL \
+              --build-arg JFROG_AUTH=$JFROG_AUTH .
+
+            docker push $AWS_ECR_DOMAIN/python-library:$CIRCLE_SHA1
 
   test:
     <<: *defaults
@@ -82,13 +95,26 @@ jobs:
 
       - setup_remote_docker
       - run:
-          name: Test code
+          name: Login AWS ECR
           command: |
-            docker create -v /src/microcosm/tests/ --name service_tests alpine:3.4 /bin/true
-            docker cp $(pwd)/microcosm/tests service_tests:/src/microcosm/
             eval $(aws ecr get-login --no-include-email)
-            docker pull ${AWS_ECR_DOMAIN}/python-library:${CIRCLE_SHA1}
+
+
+      - run:
+          name: Copy service tests to volume
+          command: |
+
+            docker create -v /src/microcosm/tests/ --name service_tests alpine:3.11 /bin/true
+            docker cp $(pwd)/microcosm/tests service_tests:/src/microcosm/
+
+      - run:
+          name: Run Test
+          command: |
             docker run -it  --volumes-from service_tests ${AWS_ECR_DOMAIN}/python-library:${CIRCLE_SHA1} test
+
+
+
+
   lint:
     <<: *defaults
 
@@ -97,15 +123,23 @@ jobs:
           at: ~/repo
 
       - setup_remote_docker
+      - run:
+          name: Login AWS ECR
+          command: |
+            eval $(aws ecr get-login --no-include-email)
+
+      - run:
+          name: Copy service tests to volume
+          command: |
+
+            docker create -v /src/microcosm/tests/ --name service_tests alpine:3.11 /bin/true
+            docker cp $(pwd)/microcosm/tests service_tests:/src/microcosm/
 
       - run:
           name: Run Lint
           command: |
-            docker create -v /src/microcosm/tests/ --name service_tests alpine:3.4 /bin/true
-            docker cp $(pwd)/microcosm/tests service_tests:/src/microcosm/
-            eval $(aws ecr get-login --no-include-email)
-            docker pull ${AWS_ECR_DOMAIN}/python-library:${CIRCLE_SHA1}
             docker run -it --volumes-from service_tests ${AWS_ECR_DOMAIN}/python-library:${CIRCLE_SHA1} lint
+
 
   typehinting:
     <<: *defaults
@@ -115,15 +149,33 @@ jobs:
           at: ~/repo
 
       - setup_remote_docker
+      - run:
+          name: Login AWS ECR
+          command: |
+            eval $(aws ecr get-login --no-include-email)
+
+      - run:
+          name: Copy service tests to volume
+          command: |
+
+            docker create -v /src/microcosm/tests/ --name service_tests alpine:3.11 /bin/true
+            docker cp $(pwd)/microcosm/tests service_tests:/src/microcosm/
 
       - run:
           name: Run Typehinting
           command: |
-            docker create -v /src/microcosm/tests/ --name service_tests alpine:3.4 /bin/true
-            docker cp $(pwd)/microcosm/tests service_tests:/src/microcosm/
-            eval $(aws ecr get-login --no-include-email)
-            docker pull ${AWS_ECR_DOMAIN}/python-library:${CIRCLE_SHA1}
             docker run -it --volumes-from service_tests ${AWS_ECR_DOMAIN}/python-library:${CIRCLE_SHA1} typehinting
+
+  deploy_jfrog_rc:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          name: Deploy
+          command: |
+            echo "Not publishing package!"
+
   deploy_pypi:
     <<: *defaults
     steps:
@@ -132,19 +184,8 @@ jobs:
       - run:
           name: Deploy
           command: |
-            echo "[distutils]" > ~/.pypirc
-            echo "index-servers =" >> ~/.pypirc
-            echo "    pypi " >> ~/.pypirc
-            echo >> ~/.pypirc
-            echo "[pypi]" >> ~/.pypirc
-            echo "repository:https://upload.pypi.org/legacy/" >> ~/.pypirc
-            echo "username:$PYPI_USERNAME" >> ~/.pypirc
-            echo "password:$PYPI_PASSWORD" >> ~/.pypirc
-            echo >> ~/.pypirc
-            version=$(cat .bumpversion.cfg | awk '/current_version / {print $3}')
-            python setup.py register -r pypi
-            python setup.py sdist
-            twine upload --repository pypi dist/microcosm-${version}.tar.gz
+            echo "Not publishing package!"
+
 
 workflows:
   version: 2
@@ -156,7 +197,7 @@ workflows:
             # run for all branches and tags
             tags:
               only: /.*/
-      - build_base_docker:
+      - build_docker:
           requires:
             - checkout
           filters:
@@ -165,21 +206,26 @@ workflows:
               only: /.*/
       - lint:
           requires:
-            - build_base_docker
+            - build_docker
           filters:
             # run for all branches and tags
             tags:
               only: /.*/
       - test:
           requires:
-            - build_base_docker
+            - build_docker
           filters:
             # run for all branches and tags
             tags:
               only: /.*/
+      - deploy_jfrog_rc:
+          requires:
+            - test
+            - lint
+            - typehinting
       - typehinting:
           requires:
-            - build_base_docker
+            - build_docker
           filters:
             # run for all branches and tags
             tags:
