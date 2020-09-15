@@ -113,7 +113,6 @@ jobs:
 
             docker push $AWS_ECR_DOMAIN/python-library:$CIRCLE_SHA1
 
-
   test:
     <<: *defaults
 
@@ -173,7 +172,6 @@ jobs:
           name: Run Lint
           command: |
             docker run -it --volumes-from service_tests ${AWS_ECR_DOMAIN}/python-library:${CIRCLE_SHA1} lint
-
 
 
   typehinting:
