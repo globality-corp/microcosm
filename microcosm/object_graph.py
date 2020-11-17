@@ -6,29 +6,44 @@ of factory functions and application configuration. Components are bound
 to the graph lazily (or via `graph.use()`) and are cached for reuse.
 
 """
-from contextlib import contextmanager
-from typing import Any, Iterable, Tuple
+from __future__ import annotations
 
-from microcosm.caching import create_cache
+from contextlib import contextmanager
+from typing import (
+    Any,
+    Callable,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Type,
+)
+
+from microcosm.caching import Cache, create_cache
 from microcosm.config.api import configure
+from microcosm.config.model import Configuration
 from microcosm.constants import RESERVED
 from microcosm.errors import CyclicGraphError, LockedGraphError
 from microcosm.hooks import invoke_resolve_hook
 from microcosm.loaders import load_from_environ
 from microcosm.metadata import Metadata
 from microcosm.profile import NoopProfiler
-from microcosm.registry import _registry
+from microcosm.registry import Registry, _registry
+from microcosm.typing import Component
+
+
+Factory = Callable[['ObjectGraph'], Component]
 
 
 class ObjectGraph:
     """
     An object graph contains all of the instantiated components for a microservice.
 
-    Because components can reference each other acyclically, this collection of
+    Because components can reference each other a-cyclically, this collection of
     components forms a directed acyclic graph.
 
     """
-    def __init__(self, metadata, config, registry, profiler, cache, loader):
+    def __init__(self, metadata: Metadata, config, registry, profiler, cache, loader) -> None:
         self.metadata = metadata
         self.config = config
         self._locked = False
@@ -37,7 +52,7 @@ class ObjectGraph:
         self._cache = cache
         self.loader = loader
 
-    def use(self, *keys):
+    def use(self, *keys: str) -> List[Component]:
         """
         Explicitly initialize a set of components by their binding keys.
 
@@ -47,7 +62,7 @@ class ObjectGraph:
             for key in keys
         ]
 
-    def assign(self, key, value):
+    def assign(self, key: str, value: Component) -> Component:
         """
         Explicitly assign a graph binding to a value.
 
@@ -59,7 +74,7 @@ class ObjectGraph:
         self._cache[key] = value
         return value
 
-    def lock(self):
+    def lock(self) -> ObjectGraph:
         """
         Lock the graph so that new components cannot be created.
 
@@ -67,7 +82,7 @@ class ObjectGraph:
         self._locked = True
         return self
 
-    def unlock(self):
+    def unlock(self) -> ObjectGraph:
         """
         Unlock the graph so that new components can created.
 
@@ -75,13 +90,13 @@ class ObjectGraph:
         self._locked = False
         return self
 
-    def factory_for(self, key):
+    def factory_for(self, key: str) -> Factory:
         return self._registry.resolve(key)
 
-    def get(self, key):
+    def get(self, key: str) -> Component:
         return self._cache.get(key)
 
-    def __getattr__(self, key):
+    def __getattr__(self, key: str) -> Component:
         """
         Access a component by its binding key.
 
@@ -103,13 +118,13 @@ class ObjectGraph:
             raise LockedGraphError(key)
         return self._resolve_key(key)
 
-    def __setattr__(self, key, value):
+    def __setattr__(self, key: str, value: Component) -> None:
         if not key.startswith("_") and key not in ("metadata", "config", "loader"):
             raise Exception("Cannot setattr on ObjectGraph for key: {}".format(key))
         super(ObjectGraph, self).__setattr__(key, value)
 
     @contextmanager
-    def _reserve(self, key):
+    def _reserve(self, key: str) -> Any:
         """
         Reserve a component's binding temporarily.
 
@@ -122,7 +137,7 @@ class ObjectGraph:
         finally:
             del self._cache[key]
 
-    def _resolve_key(self, key):
+    def _resolve_key(self, key: str) -> Component:
         """
         Attempt to lazily create a component.
 
@@ -138,7 +153,7 @@ class ObjectGraph:
 
         return self.assign(key, component)
 
-    def items(self) -> Iterable[Tuple[str, Any]]:
+    def items(self) -> Iterable[Tuple[str, Component]]:
         """
         Iterates over tuples of (key, component) for all bound components.
         """
@@ -147,23 +162,29 @@ class ObjectGraph:
     __getitem__ = __getattr__
 
 
-def create_object_graph(name,
-                        debug=False,
-                        testing=False,
-                        import_name=None,
-                        root_path=None,
-                        loader=load_from_environ,
-                        registry=_registry,
-                        profiler=None,
-                        cache=None):
+def create_object_graph(
+    name: str,
+    debug: bool = False,
+    testing: bool = False,
+    import_name: Optional[str] = None,
+    root_path: Optional[str] = None,
+    loader: Callable[[Metadata], Configuration] = load_from_environ,
+    registry: Registry = _registry,
+    profiler: Any = None,
+    cache: Optional[Type[Cache]] = None
+) -> ObjectGraph:
     """
     Create a new object graph.
 
     :param name: the name of the microservice
     :param debug: is development debugging enabled?
     :param testing: is unit testing enabled?
+    :param import_name: the import name to use for resource loading
+    :param root_path: the root path for resource loading
     :param loader: the configuration loader to use
     :param registry: the registry to use (defaults to the global)
+    :param profiler:
+    :param cache:
 
     """
     metadata = Metadata(
@@ -193,7 +214,7 @@ def create_object_graph(name,
     )
 
 
-def get_component_name(graph: ObjectGraph, component) -> str:
+def get_component_name(graph: ObjectGraph, component: Component) -> str:
     """
     Given an object that is attached to the graph, it returns the object name.
 

@@ -18,13 +18,18 @@ Combining opaque data across an entire fleet of services allows for consistent t
 easier debugging of distributed operations.
 
 """
-from collections.abc import MutableMapping
 from contextlib import ContextDecorator, ExitStack
 from copy import deepcopy
 from types import MethodType
+from typing import (
+    Any,
+    Dict,
+    MutableMapping,
+    Optional,
+)
 
 
-def _make_initializer(opaque):
+def _make_initializer(opaque: 'Opaque'):
 
     class OpaqueInitializer(ContextDecorator, ExitStack):
         def __init__(self, func, *args, **kwargs):
@@ -34,7 +39,7 @@ def _make_initializer(opaque):
                 return func(*args, **kwargs)
 
             self.func = MethodType(member_func, self)
-            self.saved = None
+            self.saved: Dict[str, Any] = dict()
 
         def __enter__(self):
             self.saved = deepcopy(opaque._store)
@@ -42,13 +47,13 @@ def _make_initializer(opaque):
 
         def __exit__(self, *exc):
             opaque._store = self.saved
-            self.saved = None
+            self.saved = dict()
             super().__exit__(*exc)
 
     return OpaqueInitializer
 
 
-class Opaque(MutableMapping):
+class Opaque(MutableMapping[str, str]):
     """
     Define a dict-like opaque context that can be initialized with application-specific values.
 
@@ -70,8 +75,8 @@ class Opaque(MutableMapping):
     See tests for usage examples.
 
     """
-    def __init__(self, *args, **kwargs):
-        self.service_name = kwargs.pop("name", None)
+    def __init__(self, *args, **kwargs) -> None:
+        self.service_name: Optional[str] = kwargs.pop("name", None)
         self._store = dict(*args, **kwargs)
         self.initialize = _make_initializer(self)
 
@@ -94,5 +99,5 @@ class Opaque(MutableMapping):
         return self._store
 
 
-def configure_opaque(graph):
+def configure_opaque(graph) -> Opaque:
     return Opaque(graph.config.opaque, name=graph.metadata.name)

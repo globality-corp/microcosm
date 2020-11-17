@@ -7,7 +7,7 @@ from time import time
 
 class NoopProfiler:
 
-    def __call__(self, key):
+    def __call__(self, key: str) -> 'NoopProfiler':
         return self
 
     def __enter__(self):
