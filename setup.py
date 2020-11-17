@@ -20,7 +20,6 @@ setup(
     python_requires=">=3.6",
     keywords="microcosm",
     install_requires=[
-        "contextdecorator>=0.10.0",
         "inflection>=0.3.1",
         "lazy>=1.3",
     ],
