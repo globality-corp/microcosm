@@ -7,7 +7,7 @@ from unittest.mock import Mock
 from hamcrest import (
     assert_that,
     calling,
-    contains,
+    contains_exactly,
     equal_to,
     has_items,
     instance_of,
@@ -73,9 +73,9 @@ def test_object_graph_use():
     assert_that(
         list(graph.items()),
         has_items(
-            contains("parent", is_(instance_of(Parent))),
-            contains("child", is_(instance_of(Child))),
-            contains("hello_world", is_(equal_to("hello world"))),
+            contains_exactly("parent", is_(instance_of(Parent))),
+            contains_exactly("child", is_(instance_of(Child))),
+            contains_exactly("hello_world", is_(equal_to("hello world"))),
         )
     )
 
