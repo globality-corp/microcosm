@@ -1,5 +1,6 @@
 # Simple Microservice Configuration
 
+
 Well-written microservices are small and single-purpose; any non-trivial ecosystem will have
 a fleet of such services, each performing a different function. Inevitably, these services
 will use common code and structure; this library provides a simple mechanism for constructing
