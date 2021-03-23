@@ -38,7 +38,7 @@ def _make_initializer(opaque):
     return initialiser
 
 
-class Opaque(MutableMapping):
+class Opaque(MutableMapping[str, str]):
     """
     Define a dict-like opaque context that can be initialized with application-specific values.
 
@@ -85,5 +85,5 @@ class Opaque(MutableMapping):
         return self._store.get()
 
 
-def configure_opaque(graph):
+def configure_opaque(graph) -> Opaque:
     return Opaque(graph.config.opaque, name=graph.metadata.name)

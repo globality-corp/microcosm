@@ -2,9 +2,10 @@
 A view of the object graph that exposes only a subset of configuration.
 
 """
+from microcosm.object_graph import ObjectGraph
 
 
-class ScopedGraph:
+class ScopedGraph(ObjectGraph):
 
     def __init__(self, graph, config):
         self._graph = graph

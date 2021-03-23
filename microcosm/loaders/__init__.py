@@ -8,6 +8,8 @@ Configuration might be loaded from a file, from environment variables,
 or from an external service.
 
 """
+from typing import Any, Dict, Optional
+
 from microcosm.config.model import Configuration
 from microcosm.loaders.compose import load_each, two_stage_loader  # noqa: F401
 from microcosm.loaders.environment import (  # noqa: F401
@@ -17,9 +19,10 @@ from microcosm.loaders.environment import (  # noqa: F401
 from microcosm.loaders.keys import expand_config  # noqa: F401
 from microcosm.loaders.settings import load_from_json_file  # noqa: F401
 from microcosm.metadata import Metadata
+from microcosm.typing import Loader
 
 
-def load_from_dict(dct=None, **kwargs):
+def load_from_dict(dct: Optional[Dict[Any, Any]] = None, **kwargs) -> Loader:
     """
     Load configuration from a dictionary.
 
@@ -27,10 +30,10 @@ def load_from_dict(dct=None, **kwargs):
     dct = dct or dict()
     dct.update(kwargs)
 
-    def _load_from_dict(metadata):
+    def _load_from_dict(metadata: Metadata) -> Configuration:
         return Configuration(dct)
     return _load_from_dict
 
 
-def empty_loader(metadata: Metadata):
+def empty_loader(metadata: Metadata) -> Configuration:
     return Configuration()
