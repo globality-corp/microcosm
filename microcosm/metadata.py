@@ -4,6 +4,7 @@ Service metadata
 """
 from os.path import abspath, dirname, join
 from sys import modules
+from typing import Optional
 
 
 class Metadata:
@@ -14,7 +15,14 @@ class Metadata:
 
     """
 
-    def __init__(self, name, debug=False, testing=False, import_name=None, root_path=None):
+    def __init__(
+        self,
+        name: str,
+        debug: bool = False,
+        testing: bool = False,
+        import_name: Optional[str] = None,
+        root_path: Optional[str] = None,
+    ):
         """
         :param name: the name of the microservice
         :param debug: is development debugging enabled?

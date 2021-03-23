@@ -7,11 +7,20 @@ and consumed using a customizable load function (default: json).
 """
 from json import loads
 from os import environ
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Mapping,
+    Optional,
+)
 
 from inflection import underscore
 
+from microcosm.metadata import Metadata
 
-def get_config_filename(metadata):
+
+def get_config_filename(metadata: Metadata) -> Optional[str]:
     """
     Derive a configuration file name from the FOO_SETTINGS
     environment variable.
@@ -24,7 +33,7 @@ def get_config_filename(metadata):
         return None
 
 
-def _load_from_file(metadata, load_func):
+def _load_from_file(metadata: Metadata, load_func: Callable[[str], Mapping[str, str]]) -> Dict[Any, Any]:
     """
     Load configuration from a file.
 
@@ -41,7 +50,7 @@ def _load_from_file(metadata, load_func):
         return dict(data)
 
 
-def load_from_json_file(metadata):
+def load_from_json_file(metadata: Metadata) -> Dict[Any, Any]:
     """
     Load configuration from a JSON file.
 

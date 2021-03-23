@@ -2,23 +2,25 @@
 Factory decorators
 
 """
+from typing import Callable, Optional
+
 from microcosm.constants import DEFAULTS
-from microcosm.registry import _registry
+from microcosm.registry import Registry, _registry
 
 
-def binding(key, registry=None):
+def binding(key: str, registry: Optional[Registry] = None) -> Callable[..., None]:
     """
     Creates a decorator that binds a factory function to a key.
 
     :param key: the binding key
-    :param: registry: the registry to bind to; defaults to the global registry
+    :param registry: the registry to bind to; defaults to the global registry
 
     """
     if registry is None:
         registry = _registry
 
     def decorator(func):
-        registry.bind(key, func)
+        registry.bind(key, func)  # type: ignore[union-attr]
         return func
     return decorator
 
