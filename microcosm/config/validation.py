@@ -2,10 +2,13 @@
 Validation for configuration.
 
 """
-from microcosm.config.model import Requirement
+from typing import Any, Dict, Tuple
+
+from microcosm.config.model import Configuration, Requirement
+from microcosm.metadata import Metadata
 
 
-def required(*args, **kwargs):
+def required(*args, **kwargs) -> Requirement:
     """
     Fluent requirement declaration.
 
@@ -13,15 +16,16 @@ def required(*args, **kwargs):
     return Requirement(*args, **kwargs)
 
 
-def typed(*args, **kwargs):
+def typed(*args, **kwargs) -> Requirement:
     """
     Fluent requirement declaration.
 
     """
-    return Requirement(*args, required=False, **kwargs)
+    kwargs["required"] = False
+    return Requirement(*args, **kwargs)
 
 
-def validate(defaults, metadata, config):
+def validate(defaults, metadata: Metadata, config: Configuration) -> None:
     """
     Validate configuration.
 
@@ -32,7 +36,7 @@ def validate(defaults, metadata, config):
             parent[path[-1]] = default.validate(metadata, path, value)
 
 
-def zip_dicts(left, right, prefix=()):
+def zip_dicts(left: Dict[Any, Any], right: Dict[Any, Any], prefix: Tuple[str, ...] = ()):
     """
     Modified zip through two dictionaries.
 

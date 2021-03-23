@@ -3,9 +3,12 @@ A factory that enables scoping.
 
 """
 from microcosm.config.api import configure
+from microcosm.config.model import Configuration
+from microcosm.object_graph import Factory, ObjectGraph
 from microcosm.registry import get_defaults
 from microcosm.scoping.object_graph import ScopedGraph
 from microcosm.scoping.proxies import ScopedProxy
+from microcosm.typing import Component
 
 
 class ScopedFactory:
@@ -32,7 +35,7 @@ class ScopedFactory:
     depending on the current scope.
 
     """
-    def __init__(self, key, func, default_scope=None):
+    def __init__(self, key: str, func: Factory, default_scope=None):
         self.key = key
         self.func = func
         self.current_scope = default_scope
@@ -43,7 +46,7 @@ class ScopedFactory:
         # NB: deliberately conflating false-y values
         return "{}.{}".format(self.current_scope or "", self.key)
 
-    def get_scoped_config(self, graph):
+    def get_scoped_config(self, graph: ObjectGraph) -> Configuration:
         """
         Compute a configuration using the current scope.
 
@@ -62,7 +65,7 @@ class ScopedFactory:
         }
         return configure(defaults, graph.metadata, loader)
 
-    def __call__(self, graph):
+    def __call__(self, graph: ObjectGraph) -> ScopedProxy:
         """
         Override component creation to use scoped config.
 
@@ -70,7 +73,7 @@ class ScopedFactory:
         self.resolve(graph)
         return ScopedProxy(graph, self)
 
-    def resolve(self, graph):
+    def resolve(self, graph: ObjectGraph) -> Component:
         """
         Resolve a scoped component, respecting the graph cache.
 
@@ -83,7 +86,7 @@ class ScopedFactory:
         graph.assign(self.scoped_key, component)
         return component
 
-    def create(self, graph):
+    def create(self, graph: ObjectGraph) -> Component:
         """
         Create a new scoped component.
 
@@ -93,7 +96,7 @@ class ScopedFactory:
         return self.func(scoped_graph)
 
     @classmethod
-    def infect(cls, graph, key, default_scope=None):
+    def infect(cls, graph: ObjectGraph, key: str, default_scope=None) -> Factory:
         """
         Forcibly convert an entry-point based factory to a ScopedFactory.
 

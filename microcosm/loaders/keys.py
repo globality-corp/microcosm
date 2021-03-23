@@ -2,26 +2,34 @@
 Key expansion.
 
 """
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+)
 
 
-def expand_config(dct,
-                  separator='.',
-                  skip_to=0,
-                  key_func=lambda key: key.lower(),
-                  key_parts_filter=lambda key_parts: True,
-                  value_func=lambda value: value):
+def expand_config(
+    dct: Dict[Any, Any],
+    separator: str = '.',
+    skip_to: int = 0,
+    key_func: Callable[[str], str] = lambda key: key.lower(),
+    key_parts_filter: Callable[[List[str]], bool] = lambda key_parts: True,
+    value_func: Callable[[str], str] = lambda value: value
+):
     """
     Expand a dictionary recursively by splitting keys along the separator.
 
     :param dct: a non-recursive dictionary
-    :param separator: a separator charactor for splitting dictionary keys
+    :param separator: a separator character for splitting dictionary keys
     :param skip_to: index to start splitting keys on; can be used to skip over a key prefix
     :param key_func: a key mapping function
     :param key_parts_filter: a filter function for excluding keys
     :param value_func: a value mapping func
 
     """
-    config = {}
+    config: Dict[str, Any] = {}
 
     for key, value in dct.items():
         key_separator = separator(key) if callable(separator) else separator

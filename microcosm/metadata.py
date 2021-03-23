@@ -4,6 +4,7 @@ Service metadata
 """
 from os.path import abspath, dirname, join
 from sys import modules
+from typing import Optional
 
 
 class Metadata:

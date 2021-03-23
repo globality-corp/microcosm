@@ -3,13 +3,20 @@ Functional composition of loaders.
 
 """
 from collections import defaultdict
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    Optional,
+)
 
 from microcosm.config.model import Configuration
 from microcosm.metadata import Metadata
 from microcosm.typing import Loader, SecondaryLoader
 
 
-def merge(configs):
+def merge(configs: Iterable[Configuration]) -> Configuration:
     result = Configuration()
     for config in configs:
         result.merge(config)
@@ -47,7 +54,7 @@ def two_stage_loader(
     return loader
 
 
-def load_each(*loaders):
+def load_each(*loaders: Loader) -> Callable[[Metadata], Configuration]:
     """
     Loader factory that combines a series of loaders.
 
@@ -88,17 +95,17 @@ class PartitioningLoader:
     """
     def __init__(self, **loaders):
         # NB: as long as we're using Python >= 3.6, the loader dict order is preserved
-        self.loaders = loaders
-        self.partitions = defaultdict(dict)
+        self.loaders: Dict[str, Loader] = loaders
+        self.partitions: Dict[str, Dict[str, str]] = defaultdict(dict)
 
-    def __getattr__(self, partition):
+    def __getattr__(self, partition) -> Optional[Dict[str, str]]:
         """
         Get all (post-merge) config data generated from a specific partition.
 
         """
         return self.partitions.get(partition)
 
-    def merge_partition(self, partition, path, value):
+    def merge_partition(self, partition: str, path: Iterable[str], value: Any) -> None:
         """
         Merge a value into a partition for a key path.
 
@@ -106,10 +113,10 @@ class PartitioningLoader:
         dct = self.partitions[partition]
         *heads, tail = path
         for part in heads:
-            dct = dct.setdefault(part, dict())
+            dct = dct.setdefault(part, dict())  # type: ignore
         dct[tail] = value
 
-    def __call__(self, metadata):
+    def __call__(self, metadata: Metadata) -> Configuration:
         """
         Load configuration from multiple partitions and preserve where each key
         came from.
@@ -132,9 +139,9 @@ class PartitioningLoader:
         return config
 
 
-def load_partitioned(**loaders):
+def load_partitioned(**loaders: Loader) -> PartitioningLoader:
     return PartitioningLoader(**loaders)
 
 
-def load_config_and_secrets(config, secrets):
+def load_config_and_secrets(config: Loader, secrets: Loader) -> PartitioningLoader:
     return PartitioningLoader(config=config, secrets=secrets)
