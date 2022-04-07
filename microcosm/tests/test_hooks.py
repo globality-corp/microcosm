@@ -44,19 +44,17 @@ class TestHooks:
         """
         graph = create_object_graph("test")
         graph.use("clazz")
-        graph.lock()
-
         assert_that(graph.clazz.callbacks, contains_exactly("clazz_resolved"))
 
     def test_on_resolve_clazz_again(self):
         """
-        Resolving Clazz again results in only one hook call.
+        Resolving Clazz twice results in only one hook call, because the object is not created twice.
 
         """
         graph = create_object_graph("test")
         graph.use("clazz")
-        graph.lock()
-
+        assert_that(graph.clazz.callbacks, contains_exactly("clazz_resolved"))
+        graph.use("clazz")
         assert_that(graph.clazz.callbacks, contains_exactly("clazz_resolved"))
 
     def test_on_resolve_clazz_subclazz(self):
@@ -68,7 +66,6 @@ class TestHooks:
         graph = create_object_graph("test")
         graph.use("clazz")
         graph.use("subclazz")
-        graph.lock()
 
         assert_that(graph.clazz.callbacks, contains_exactly("clazz_resolved"))
         assert_that(graph.subclazz.callbacks, contains_exactly("subclazz_resolved"))
@@ -79,9 +76,11 @@ class TestHooks:
 
         """
         graph = create_object_graph("test")
+        graph.use("clazz")
         graph.use("clazz2")
-        graph.lock()
 
+        assert graph.clazz is not graph.clazz2
+        assert_that(graph.clazz.callbacks, contains_exactly("clazz_resolved"))
         assert_that(graph.clazz2.callbacks, contains_exactly("clazz_resolved"))
 
     def test_on_resolve_clazz2_again(self):
@@ -91,6 +90,6 @@ class TestHooks:
         """
         graph = create_object_graph("test")
         graph.use("clazz2")
-        graph.lock()
-
+        assert_that(graph.clazz2.callbacks, contains_exactly("clazz_resolved"))
+        graph.use("clazz2")
         assert_that(graph.clazz2.callbacks, contains_exactly("clazz_resolved"))
