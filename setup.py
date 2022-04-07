@@ -26,9 +26,6 @@ setup(
         "inflection>=0.3.1",
         "lazy>=1.3",
     ],
-    setup_requires=[
-        "nose>=1.3.6",
-    ],
     dependency_links=[
     ],
     entry_points={
@@ -37,8 +34,18 @@ setup(
             "opaque = microcosm.opaque:configure_opaque",
         ],
     },
-    tests_require=[
-        "coverage>=3.7.1",
-        "PyHamcrest>=1.8.5",
-    ],
+    extras_require={
+        "test": [
+            "coverage>=3.7.1",
+            "nose>=1.3.6",
+            "PyHamcrest>=1.8.5",
+        ],
+        "lint": [
+            "flake8",
+            "flake8-print",
+            "flake8-logging-format",
+            "isort<5",
+            "flake8-isort",
+        ],
+    },
 )
