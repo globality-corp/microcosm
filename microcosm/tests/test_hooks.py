@@ -3,6 +3,7 @@ Test hook invocation.
 
 """
 from hamcrest import assert_that, contains_exactly
+from nose.tools import assert_raises_regexp
 
 from microcosm.api import binding, create_object_graph
 from microcosm.hooks import on_resolve
@@ -93,3 +94,49 @@ class TestHooks:
         assert_that(graph.clazz2.callbacks, contains_exactly("clazz_resolved"))
         graph.use("clazz2")
         assert_that(graph.clazz2.callbacks, contains_exactly("clazz_resolved"))
+
+    def test_no_hooks(self):
+        @binding("clazz_no_hooks")
+        class ClazzNoHooks(Clazz):
+            pass
+        graph = create_object_graph("test")
+        graph.use("clazz_no_hooks")
+        assert_that(graph.clazz_no_hooks.callbacks == [])
+
+    def test_hook_type_error_does_not_stop_subsequent_hooks(self):
+        @binding("clazz_type_error")
+        class ClazzTypeError(Clazz):
+            pass
+
+        def throw_type_error(any_object, value):
+            raise TypeError()
+        on_resolve(ClazzTypeError, throw_type_error, "string")
+        on_resolve(ClazzTypeError, append_callbacks, "hook2")
+
+        graph = create_object_graph("test")
+        graph.use("clazz_type_error")
+        assert_that(graph.clazz_type_error.callbacks, contains_exactly("hook2"))
+
+    def test_hook_value_error_does_not_stop_subsequent_hooks(self):
+        @binding("clazz_value_error")
+        class ClazzValueError(Clazz):
+            pass
+
+        def throw_value_error(any_object, value):
+            raise ValueError()
+        on_resolve(ClazzValueError, throw_value_error, "string")
+        on_resolve(ClazzValueError, append_callbacks, "hook2")
+
+        graph = create_object_graph("test")
+        graph.use("clazz_value_error")
+        assert_that(graph.clazz_value_error.callbacks, contains_exactly("hook2"))
+
+    def test_hook_error_getting_hooks(self):
+        @binding("clazz_exception")
+        class ClazzException(Clazz):
+            def __getattr__(self, name):
+                raise Exception("my message")
+
+        graph = create_object_graph("test")
+        with assert_raises_regexp(Exception, "my message"):
+            graph.use("clazz_exception")

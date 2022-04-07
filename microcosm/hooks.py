@@ -55,13 +55,14 @@ def _invoke_hook(hook_prefix: str, target_component: Any) -> None:
     hook_name = _get_hook_name(hook_prefix, target_component.__class__)
     try:
         for value in getattr(target_component, hook_name):
-            func, args, kwargs = value
-            func(target_component, *args, **kwargs)
+            try:
+                func, args, kwargs = value
+                func(target_component, *args, **kwargs)
+            except (TypeError, ValueError):
+                # hook not properly defined (might be a mock)
+                pass
     except AttributeError:
         # no hook defined
-        pass
-    except (TypeError, ValueError):
-        # hook not properly defined (might be a mock)
         pass
 
 
