@@ -8,29 +8,28 @@ from microcosm.api import binding, create_object_graph
 from microcosm.hooks import on_resolve
 
 
-def foo_hook(foo, value):
-    foo.callbacks.append(value)
+def append_callbacks(any_object, value):
+    any_object.callbacks.append(value)
 
 
-@binding("foo")
-class Foo:
-
+@binding("clazz")
+class Clazz:
     def __init__(self, graph):
         self.callbacks = []
 
 
-@binding("subfoo")
-class SubFoo(Foo):
+@binding("subclazz")
+class SubClazz(Clazz):
     pass
 
 
-@binding("bar")
-def new_foo(graph):
-    return Foo(graph)
+@binding("clazz2")
+def new_clazz(graph):
+    return Clazz(graph)
 
 
-on_resolve(Foo, foo_hook, "baz")
-on_resolve(SubFoo, foo_hook, "qux")
+on_resolve(Clazz, append_callbacks, "clazz_resolved")
+on_resolve(SubClazz, append_callbacks, "subclazz_resolved")
 
 
 class TestHooks:
@@ -38,60 +37,60 @@ class TestHooks:
     Test hook invocations.
 
     """
-    def test_on_resolve_foo_once(self):
+    def test_on_resolve_clazz_once(self):
         """
-        Resolving Foo calls the hook.
-
-        """
-        graph = create_object_graph("test")
-        graph.use("foo")
-        graph.lock()
-
-        assert_that(graph.foo.callbacks, contains_exactly("baz"))
-
-    def test_on_resolve_foo_again(self):
-        """
-        Resolving Foo again results in only one hook call.
+        Resolving Clazz calls the hook.
 
         """
         graph = create_object_graph("test")
-        graph.use("foo")
+        graph.use("clazz")
         graph.lock()
 
-        assert_that(graph.foo.callbacks, contains_exactly("baz"))
+        assert_that(graph.clazz.callbacks, contains_exactly("clazz_resolved"))
 
-    def test_on_resolve_foo_subfoo(self):
+    def test_on_resolve_clazz_again(self):
+        """
+        Resolving Clazz again results in only one hook call.
+
+        """
+        graph = create_object_graph("test")
+        graph.use("clazz")
+        graph.lock()
+
+        assert_that(graph.clazz.callbacks, contains_exactly("clazz_resolved"))
+
+    def test_on_resolve_clazz_subclazz(self):
         """
         If we have two components, and one is a subclass of the other's class, we should
         still have isolation of the hooks between them
 
         """
         graph = create_object_graph("test")
-        graph.use("foo")
-        graph.use("subfoo")
+        graph.use("clazz")
+        graph.use("subclazz")
         graph.lock()
 
-        assert_that(graph.foo.callbacks, contains_exactly("baz"))
-        assert_that(graph.subfoo.callbacks, contains_exactly("qux"))
+        assert_that(graph.clazz.callbacks, contains_exactly("clazz_resolved"))
+        assert_that(graph.subclazz.callbacks, contains_exactly("subclazz_resolved"))
 
-    def test_on_resolve_bar_once(self):
+    def test_on_resolve_clazz2_once(self):
         """
-        Resolving Foo through a separate factory calls the hook.
+        Resolving Clazz through a separate factory calls the hook.
 
         """
         graph = create_object_graph("test")
-        graph.use("bar")
+        graph.use("clazz2")
         graph.lock()
 
-        assert_that(graph.bar.callbacks, contains_exactly("baz"))
+        assert_that(graph.clazz2.callbacks, contains_exactly("clazz_resolved"))
 
-    def test_on_resolve_bar_again(self):
+    def test_on_resolve_clazz2_again(self):
         """
-        Resolving Foo through a separate factory again results in only one hook call.
+        Resolving Clazz through a separate factory again results in only one hook call.
 
         """
         graph = create_object_graph("test")
-        graph.use("bar")
+        graph.use("clazz2")
         graph.lock()
 
-        assert_that(graph.bar.callbacks, contains_exactly("baz"))
+        assert_that(graph.clazz2.callbacks, contains_exactly("clazz_resolved"))
