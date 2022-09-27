@@ -74,6 +74,7 @@ htmlcov/
 .tox/
 .coverage
 .coverage.*
+coverage/
 .cache
 nosetests.xml
 coverage.xml
@@ -94,3 +95,6 @@ docs/_build/
 target/
 
 .mypy_cache/
+
+# Python Virtual Environments
+venv/

@@ -30,7 +30,7 @@ elif [ "$1" = "lint" ]; then
    exec flake8 ${NAME}
 elif [ "$1" = "typehinting" ]; then
    # Install standard type-linting dependencies
-   pip --quiet install mypy
+   pip --quiet install mypy types-python-dateutil types-setuptools
    mypy ${NAME} --ignore-missing-imports
 else
    echo "Cannot execute $@"

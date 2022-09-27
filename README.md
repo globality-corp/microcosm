@@ -110,3 +110,35 @@ makes a few assumption that allow for a great deal of simplication:
 
  4. Some components will be functions that modify other components rather than objects
     that need to be instantiated.
+
+## Setup
+
+Create a virtualenv
+
+```
+python -m venv venv
+. ./venv/bin/activate
+```
+
+Install dependencies
+
+```
+pip install -U -e .
+```
+
+## Tests
+
+Run the tests
+
+```
+python setup.py nosetests
+```
+
+## Lint
+
+Lint the code:
+
+```
+NAME=microcosm ./entrypoint.sh lint
+NAME=microcosm ./entrypoint.sh typehinting
+```
