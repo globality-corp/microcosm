@@ -27,6 +27,19 @@ setup(
     setup_requires=[
         "nose>=1.3.6",
     ],
+    extras_require={
+        "test": [
+            "nose>=1.3.7",
+            "PyHamcrest",
+            "coverage",
+        ],
+        "lint": [
+            "flake8<5",
+            "flake8-print",
+            "flake8-logging-format",
+            "flake8-isort"
+        ]
+    },
     dependency_links=[
     ],
     entry_points={
@@ -37,7 +50,6 @@ setup(
     },
     tests_require=[
         "coverage>=3.7.1",
-        "nose>=1.3.6",
         "PyHamcrest>=1.8.5",
     ],
 )
