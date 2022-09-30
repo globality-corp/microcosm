@@ -37,6 +37,7 @@ setup(
     },
     tests_require=[
         "coverage>=3.7.1",
+        "nose>=1.3.6",
         "PyHamcrest>=1.8.5",
     ],
 )
