@@ -1,5 +1,10 @@
 #!/bin/bash -e
 
+#  This file is auto generated with globality-build.
+#  You should not make any changes to this file manually
+#
+#  See: http://github.com/globality-corp/globality-build
+
 # Container entrypoint to simplify running the production and dev servers.
 
 # Entrypoint conventions are as follows:
@@ -21,17 +26,17 @@
 if [ "$1" = "test" ]; then
    # Install standard test dependencies; YMMV
    pip --quiet install \
-       .[test] nose "PyHamcrest<1.10.0" coverage
-   exec nosetests
+       .[test]
+   nosetests
 elif [ "$1" = "lint" ]; then
    # Install standard linting dependencies; YMMV
    pip --quiet install \
-       .[lint] flake8 flake8-print flake8-logging-format "isort<5" flake8-isort
+       .[lint]
    exec flake8 ${NAME}
 elif [ "$1" = "typehinting" ]; then
    # Install standard type-linting dependencies
    pip --quiet install mypy types-python-dateutil types-setuptools
-   mypy ${NAME} --ignore-missing-imports
+   exec mypy ${NAME} --ignore-missing-imports
 else
    echo "Cannot execute $@"
    exit 3
