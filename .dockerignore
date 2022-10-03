@@ -5,9 +5,12 @@ microcosm/tests
 !entrypoint.sh
 !MANIFEST.in
 !README.md
-!requirements.txt
+!HISTORY.rst
+!requirements*.txt
 !setup.py
 !setup.cfg
+!mypy.ini
+!pyproject.toml
+!conftest.py
 **/*.pyc
 **/*~
-

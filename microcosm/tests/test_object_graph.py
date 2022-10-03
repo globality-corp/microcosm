@@ -64,11 +64,8 @@ def test_object_graph_use():
     graph = create_object_graph(
         name="test",
     )
-    parent, _ = graph.use(
-        "parent",
-        "hello_world"
-    )
-    assert_that(graph.get('parent'), is_(instance_of(Parent)))
+    parent, _ = graph.use("parent", "hello_world")
+    assert_that(graph.get("parent"), is_(instance_of(Parent)))
     assert_that(parent, is_(instance_of(Parent)))
     assert_that(
         list(graph.items()),
@@ -100,7 +97,9 @@ def test_object_graph_partial_use():
 
     graph = create_object_graph("test", registry=registry)
     # exception raised from initial call to create_second
-    assert_that(calling(graph.use).with_args("first", "second", "third"), raises(Exception))
+    assert_that(
+        calling(graph.use).with_args("first", "second", "third"), raises(Exception)
+    )
     # first and second were called, but not third
     assert_that(create_first.call_count, is_(equal_to(1)))
     assert_that(create_second.call_count, is_(equal_to(1)))
@@ -163,7 +162,20 @@ def test_get_component_name_function():
     graph.use("parent")
     graph.lock()
 
-    assert_that(
-        get_component_name(graph, graph.parent),
-        is_(equal_to("parent"))
+    assert_that(get_component_name(graph, graph.parent), is_(equal_to("parent")))
+
+
+def test_describe_object_graph():
+    graph = create_object_graph(
+        name="test", description="A description of the object graph."
     )
+    assert_that(
+        graph.metadata.description, is_(equal_to("A description of the object graph."))
+    )
+
+
+def test_default_object_graph_description():
+    graph = create_object_graph(
+        name="test",
+    )
+    assert_that(graph.metadata.description, is_(equal_to("")))

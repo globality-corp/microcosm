@@ -14,13 +14,14 @@ class Metadata:
 
     """
 
-    def __init__(self, name, debug=False, testing=False, import_name=None, root_path=None):
+    def __init__(self, name, debug=False, testing=False, import_name=None, root_path=None, description=""):
         """
         :param name: the name of the microservice
         :param debug: is development debugging enabled?
         :param testing: is unit testing enabled?
         :param import_name: the import name to use for resource loading
         :param root_path: the root path for resource loading
+        :param description: an informative description
 
         """
         self.name = name
@@ -28,6 +29,7 @@ class Metadata:
         self.testing = testing
         self.import_name = import_name or self.name
         self.root_path = root_path or self.get_root_path(self.import_name)
+        self.description = description
 
     def get_root_path(self, name):
         """
@@ -39,7 +41,7 @@ class Metadata:
 
         """
         module = modules.get(name)
-        if module is not None and hasattr(module, '__file__'):
+        if module is not None and hasattr(module, "__file__"):
             return dirname(abspath(module.__file__))
 
         # Flask keeps looking at this point. We instead set the root path to None,
@@ -49,5 +51,7 @@ class Metadata:
 
     def get_path(self, path):
         if self.root_path is None:
-            raise RuntimeError("Root path was not defined. Either use a resolvable name or set root path explicitly.")
+            raise RuntimeError(
+                "Root path was not defined. Either use a resolvable name or set root path explicitly."
+            )
         return join(self.root_path, path)

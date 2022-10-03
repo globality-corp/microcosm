@@ -42,10 +42,7 @@ class ObjectGraph:
         Explicitly initialize a set of components by their binding keys.
 
         """
-        return [
-            getattr(self, key)
-            for key in keys
-        ]
+        return [getattr(self, key) for key in keys]
 
     def assign(self, key, value):
         """
@@ -155,7 +152,8 @@ def create_object_graph(name,
                         loader=load_from_environ,
                         registry=_registry,
                         profiler=None,
-                        cache=None):
+                        cache=None,
+                        description=""):
     """
     Create a new object graph.
 
@@ -164,6 +162,7 @@ def create_object_graph(name,
     :param testing: is unit testing enabled?
     :param loader: the configuration loader to use
     :param registry: the registry to use (defaults to the global)
+    :param description: an informative description of the graph object
 
     """
     metadata = Metadata(
@@ -172,6 +171,7 @@ def create_object_graph(name,
         testing=testing,
         import_name=import_name,
         root_path=root_path,
+        description=description,
     )
 
     defaults = registry.defaults
