@@ -1,13 +1,15 @@
 import json
 
-from hamcrest import assert_that, equal_to, is_, none
+from hamcrest import (
+    assert_that,
+    equal_to,
+    is_,
+    none,
+)
 
+from microcosm.loaders.secrets_file import get_config_filename, load_from_json_secrets_file
 from microcosm.metadata import Metadata
 from microcosm.tests.loaders.fixtures import envvar, settings
-from microcosm.loaders.secrets_file import (
-    get_config_filename,
-    load_from_json_secrets_file,
-)
 
 
 def test_get_secrets_file_path():
