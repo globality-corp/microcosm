@@ -212,7 +212,11 @@ jobs:
       - attach_workspace:
           at: ~/repo
       - run:
-          name: Deploy  # If package publishing enabled, always push RCs to JFrog
+          name: Override Version
+          command: |
+            sed -i -e "s/^\(version = \".*\)\"$/\1.dev${CIRCLE_BUILD_NUM}\"/" setup.py
+      - run:
+          name: Authenticate
           command: |
             echo "[distutils]" > ~/.pypirc
             echo "index-servers =" >> ~/.pypirc
@@ -223,12 +227,9 @@ jobs:
             echo "username:$JFROG_USERNAME" >> ~/.pypirc
             echo "password:$JFROG_PASSWORD" >> ~/.pypirc
             echo >> ~/.pypirc
-            echo >> ~/.pypirc
-            version=0.${CIRCLE_BUILD_NUM}.dev${CIRCLE_BUILD_NUM}
-            sed  -i '/version \=/s/\".*\"/'"\"${version}\"/" setup.py
-            python setup.py register -r jfrog
-            python setup.py sdist
-            twine upload --repository jfrog dist/microcosm-${version}.tar.gz
+      - run:
+          name: Publish
+          command: python setup.py sdist upload -r jfrog
 
   publish_library:
     <<: *defaults
@@ -259,14 +260,14 @@ workflows:
   build-and-release:
     jobs:
       - checkout:
-          context: 
+          context:
           - Globality-Common
           filters:
             # run for all branches and tags
             tags:
               only: /.*/
       - build_docker:
-          context: 
+          context:
           - Globality-Common
           requires:
             - checkout
@@ -275,7 +276,7 @@ workflows:
             tags:
               only: /.*/
       - lint:
-          context: 
+          context:
           - Globality-Common
           requires:
             - build_docker
@@ -284,7 +285,7 @@ workflows:
             tags:
               only: /.*/
       - test:
-          context: 
+          context:
           - Globality-Common
           requires:
             - build_docker
@@ -293,14 +294,14 @@ workflows:
             tags:
               only: /.*/
       - deploy_jfrog_rc:
-          context: 
+          context:
           - Globality-Common
           requires:
             - test
             - lint
             - typehinting
       - typehinting:
-          context: 
+          context:
           - Globality-Common
           requires:
             - build_docker
@@ -309,7 +310,7 @@ workflows:
             tags:
               only: /.*/
       - publish_library:
-          context: 
+          context:
           - Globality-Common
           - Python-Context
           requires:
