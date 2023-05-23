@@ -19,35 +19,23 @@ easier debugging of distributed operations.
 
 """
 from collections.abc import MutableMapping
-from contextlib import ContextDecorator, ExitStack
+from contextlib import contextmanager
 from contextvars import ContextVar
 from copy import deepcopy
-from types import MethodType
 from typing import Optional
 
 
 def _make_initializer(opaque):
-    class OpaqueInitializer(ContextDecorator, ExitStack):
-        def __init__(self, func, *args, **kwargs):
-            super().__init__()
+    @contextmanager
+    def initialiser(func, *args, **kwargs):
+        token = opaque._store.set(deepcopy(opaque._store.get()))
+        opaque.update(func(*args, **kwargs))
+        try:
+            yield
+        finally:
+            opaque._store.reset(token)
 
-            def member_func(self):
-                return func(*args, **kwargs)
-
-            self.func = MethodType(member_func, self)
-            self.token = None
-
-        def __enter__(self):
-            self.token = opaque._store.set(deepcopy(opaque._store.get()))
-            self.saved = deepcopy(opaque._store.get())
-            opaque.update(self.func())
-
-        def __exit__(self, *exc):
-            if self.token:
-                opaque._store.reset(self.token)
-            super().__exit__(*exc)
-
-    return OpaqueInitializer
+    return initialiser
 
 
 class Opaque(MutableMapping):
