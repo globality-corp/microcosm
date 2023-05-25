@@ -19,33 +19,23 @@ easier debugging of distributed operations.
 
 """
 from collections.abc import MutableMapping
-from contextlib import ContextDecorator, ExitStack
+from contextlib import contextmanager
+from contextvars import ContextVar
 from copy import deepcopy
-from types import MethodType
+from typing import Optional
 
 
 def _make_initializer(opaque):
+    @contextmanager
+    def initialiser(func, *args, **kwargs):
+        token = opaque._store.set(deepcopy(opaque._store.get()))
+        opaque.update(func(*args, **kwargs))
+        try:
+            yield
+        finally:
+            opaque._store.reset(token)
 
-    class OpaqueInitializer(ContextDecorator, ExitStack):
-        def __init__(self, func, *args, **kwargs):
-            super().__init__()
-
-            def member_func(self):
-                return func(*args, **kwargs)
-
-            self.func = MethodType(member_func, self)
-            self.saved = None
-
-        def __enter__(self):
-            self.saved = deepcopy(opaque._store)
-            opaque.update(self.func())
-
-        def __exit__(self, *exc):
-            opaque._store = self.saved
-            self.saved = None
-            super().__exit__(*exc)
-
-    return OpaqueInitializer
+    return initialiser
 
 
 class Opaque(MutableMapping):
@@ -70,28 +60,29 @@ class Opaque(MutableMapping):
     See tests for usage examples.
 
     """
-    def __init__(self, *args, **kwargs):
-        self.service_name = kwargs.pop("name", None)
-        self._store = dict(*args, **kwargs)
+
+    def __init__(self, *args, **kwargs) -> None:
+        self.service_name: Optional[str] = kwargs.pop("name", None)
+        self._store = ContextVar("store", default=dict(*args, **kwargs))
         self.initialize = _make_initializer(self)
 
     def __getitem__(self, key):
-        return self._store[key]
+        return self._store.get()[key]
 
     def __setitem__(self, key, value):
-        self._store[key] = value
+        self._store.get()[key] = value
 
     def __delitem__(self, key):
-        del self._store[key]
+        del self._store.get()[key]
 
     def __iter__(self):
-        return iter(self._store)
+        return iter(self._store.get())
 
     def __len__(self):
-        return len(self._store)
+        return len(self._store.get())
 
     def as_dict(self):
-        return self._store
+        return self._store.get()
 
 
 def configure_opaque(graph):
