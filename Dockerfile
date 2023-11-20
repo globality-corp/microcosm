@@ -12,7 +12,8 @@
 #
 
 # ----------- deps -----------
-FROM python:3.7-slim-bullseye as deps
+# Install from Debian bullseye with modern Python support
+FROM python:3.9-slim-bullseye as deps
 
 #
 # Most services will use the same set of packages here, though a few will install
@@ -22,7 +23,7 @@ FROM python:3.7-slim-bullseye as deps
 ARG EXTRA_INDEX_URL
 ENV EXTRA_INDEX_URL ${EXTRA_INDEX_URL}
 
-ENV CORE_PACKAGES locales
+ENV CORE_PACKAGES locales libpq-dev
 ENV BUILD_PACKAGES build-essential libffi-dev
 ENV OTHER_PACKAGES libssl-dev
 
@@ -101,7 +102,6 @@ ENTRYPOINT ["./entrypoint.sh"]
 # We should not need to reinstall dependencies here, but we do need to import
 # the distribution properly. We also save build arguments to the image using
 # microcosm-compatible environment variables.
-
 
 ARG BUILD_NUM
 ARG SHA1

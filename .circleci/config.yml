@@ -74,7 +74,6 @@ whitelist: &whitelist
 jobs:
   checkout:
     <<: *defaults
-
     steps:
       - checkout
 
@@ -82,18 +81,14 @@ jobs:
       - persist_to_workspace:
           root: ~/repo
           <<: *whitelist
-
   build_docker:
     <<: *defaults
-
     steps:
       - attach_workspace:
           at: ~/repo
-
       - setup_remote_docker:
           version: 19.03.12
           docker_layer_caching: true
-
       - run:
           name: Login AWS ECR
           command: |
@@ -103,7 +98,6 @@ jobs:
           command: |
             # pwd is here to prevent error when pre_docker_build returns nothing
             pwd
-
 
             docker build --tag $AWS_ECR_DOMAIN/python-library:$CIRCLE_SHA1 \
               --build-arg BUILD_NUM=$CIRCLE_BUILD_NUM \
@@ -116,7 +110,6 @@ jobs:
 
   test:
     <<: *defaults
-
     steps:
       - attach_workspace:
           at: ~/repo
@@ -134,21 +127,14 @@ jobs:
       - run:
           name: Copy service tests to volume
           command: |
-
             docker create -v /src/microcosm/tests/ --name service_tests alpine:3.11 /bin/true
             docker cp $(pwd)/microcosm/tests service_tests:/src/microcosm/
-
       - run:
           name: Run Test
           command: |
             docker run -it  --volumes-from service_tests ${AWS_ECR_DOMAIN}/python-library:${CIRCLE_SHA1} test
-
-
-
-
   lint:
     <<: *defaults
-
     steps:
       - attach_workspace:
           at: ~/repo
@@ -161,14 +147,11 @@ jobs:
           name: Login AWS ECR
           command: |
             aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ECR_DOMAIN}
-
       - run:
           name: Copy service tests to volume
           command: |
-
             docker create -v /src/microcosm/tests/ --name service_tests alpine:3.11 /bin/true
             docker cp $(pwd)/microcosm/tests service_tests:/src/microcosm/
-
       - run:
           name: Run Lint
           command: |
@@ -178,7 +161,6 @@ jobs:
 
   typehinting:
     <<: *defaults
-
     steps:
       - attach_workspace:
           at: ~/repo
@@ -191,14 +173,11 @@ jobs:
           name: Login AWS ECR
           command: |
             aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ECR_DOMAIN}
-
       - run:
           name: Copy service tests to volume
           command: |
-
             docker create -v /src/microcosm/tests/ --name service_tests alpine:3.11 /bin/true
             docker cp $(pwd)/microcosm/tests service_tests:/src/microcosm/
-
       - run:
           name: Run Typehinting
           command: |
@@ -230,7 +209,6 @@ jobs:
       - run:
           name: Publish
           command: python setup.py sdist upload -r jfrog
-
   publish_library:
     <<: *defaults
     steps:
@@ -322,5 +300,3 @@ workflows:
               ignore: /.*/
             tags:
               only: /^[0-9]+(\.[0-9]+)*/
-
-

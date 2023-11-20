@@ -3,7 +3,7 @@ Registry of component factories.
 
 """
 from itertools import chain
-from pkg_resources import DistributionNotFound, iter_entry_points
+from pkg_resources import DistributionNotFound, iter_entry_points  # type: ignore[import-untyped]
 from typing import (
     Any,
     Callable,

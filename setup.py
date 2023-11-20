@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 
 
 project = "microcosm"
-version = "3.2.0"
+version = "3.3.0"
 
 setup(
     name=project,
@@ -20,38 +20,29 @@ setup(
     },
     include_package_data=True,
     zip_safe=False,
-    python_requires=">=3.6",
+    python_requires=">=3.9",
     keywords="microcosm",
     install_requires=[
-        "inflection>=0.3.1",
-        "lazy>=1.3",
-    ],
-    setup_requires=[
-        "nose>=1.3.6",
+        "inflection>=0.5.1",
+        "lazy>=1.6",
     ],
     extras_require={
-        "test": [
-            "nose>=1.3.7",
-            "PyHamcrest",
-            "coverage",
+        "build": [
+            "coverage>=7.3.2",
+            "flake8-isort>=6.1.1",
+            "flake8-logging-format>=0.9.0",
+            "flake8-print>=5.0.0",
+            "flake8>=6.1.0",
+            "mypy>=1.7.0",
+            "PyHamcrest>=2.1.0",
+            "pytest-cov>=4.1.0",
+            "pytest>=7.4.3",
         ],
-        "lint": [
-            "flake8<5",
-            "flake8-print",
-            "flake8-logging-format",
-            "flake8-isort"
-        ]
     },
-    dependency_links=[
-    ],
     entry_points={
         "microcosm.factories": [
             "hello_world = microcosm.example:create_hello_world",
             "opaque = microcosm.opaque:configure_opaque",
         ],
     },
-    tests_require=[
-        "coverage>=3.7.1",
-        "PyHamcrest>=1.8.5",
-    ],
 )
