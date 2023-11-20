@@ -20,6 +20,7 @@
 
 if [ "$1" = "test" ]; then
    pip install --no-cache-dir --upgrade --extra-index-url ${EXTRA_INDEX_URL} .\[build\]
+   shift
    exec pytest "$@"
 elif [ "$1" = "lint" ]; then
    pip install --no-cache-dir --upgrade --extra-index-url ${EXTRA_INDEX_URL} .\[build\]

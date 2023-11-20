@@ -26,10 +26,6 @@ setup(
         "inflection>=0.5.1",
         "lazy>=1.6",
     ],
-    setup_requires=[
-    ],
-    dependency_links=[
-    ],
     extras_require={
         "build": [
             "coverage>=7.3.2",
