@@ -21,12 +21,57 @@ easier debugging of distributed operations.
 from contextlib import ContextDecorator, ExitStack
 from copy import deepcopy
 from types import MethodType
-from typing import (
-    Any,
-    Dict,
-    MutableMapping,
-    Optional,
-)
+from typing import MutableMapping, Optional
+
+
+class NormalizedDict(dict):  # type: ignore[type-arg]
+    """
+    Dict where all str keys are lowercase and read methods are case-insensitive.
+
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for key in list(self.keys()):
+            value = super().pop(key)
+            self[key] = value
+
+    def __setitem__(self, key, value):
+        super().__setitem__(self._convert_key(key), value)
+
+    def __getitem__(self, key):
+        return super().__getitem__(self._convert_key(key))
+
+    def __delitem__(self, key):
+        super().__delitem__(self._convert_key(key))
+
+    def __contains__(self, key):
+        return super().__contains__(self._convert_key(key))
+
+    def pop(self, key, *args, **kwargs):
+        return super().pop(self._convert_key(key), *args, **kwargs)
+
+    def get(self, key, *args, **kwargs):
+        return super().get(self._convert_key(key), *args, **kwargs)
+
+    def update(self, *args, **kwargs):
+        for key, value in dict(*args, **kwargs).items():
+            self[key] = value
+
+    def setdefault(self, key, *args, **kwargs):
+        super().setdefault(self._convert_key(key), *args, **kwargs)
+
+    @classmethod
+    def fromkeys(cls, keys, v=None):
+        keys = (
+            cls._convert_key(key)
+            for key in keys
+        )
+        return super().fromkeys(keys, v)
+
+    @staticmethod
+    def _convert_key(key):
+        return key.casefold() if isinstance(key, str) else key
 
 
 def _make_initializer(opaque: 'Opaque'):
@@ -39,7 +84,7 @@ def _make_initializer(opaque: 'Opaque'):
                 return func(*args, **kwargs)
 
             self.func = MethodType(member_func, self)
-            self.saved: Dict[str, Any] = dict()
+            self.saved = NormalizedDict()
 
         def __enter__(self):
             self.saved = deepcopy(opaque._store)
@@ -47,7 +92,7 @@ def _make_initializer(opaque: 'Opaque'):
 
         def __exit__(self, *exc):
             opaque._store = self.saved
-            self.saved = dict()
+            self.saved = NormalizedDict()
             super().__exit__(*exc)
 
     return OpaqueInitializer
@@ -77,7 +122,7 @@ class Opaque(MutableMapping[str, str]):
     """
     def __init__(self, *args, **kwargs) -> None:
         self.service_name: Optional[str] = kwargs.pop("name", None)
-        self._store = dict(*args, **kwargs)
+        self._store = NormalizedDict(*args, **kwargs)
         self.initialize = _make_initializer(self)
 
     def __getitem__(self, key):
