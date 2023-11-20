@@ -31,7 +31,7 @@ from microcosm.tests.config.check_warnings import (
 
 class TestValidation:
 
-    def setup(self):
+    def setup_method(self):
         self.metadata = Metadata("test")
         self.registry = Registry()
 

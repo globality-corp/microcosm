@@ -10,7 +10,7 @@ from hamcrest import (
 )
 
 from microcosm.api import binding, create_object_graph, load_from_dict
-from microcosm.opaque import Opaque
+from microcosm.opaque import NormalizedDict, Opaque
 
 
 THIS = "this"
@@ -25,6 +25,83 @@ def example_func(this, that):
         THIS: this,
         THAT: that,
     }
+
+
+def test_normalized_dict_init():
+    dct = NormalizedDict()
+    assert not dct
+
+    dct = NormalizedDict(foo="bar", Bar="Foo", baz="qux")
+    assert dct == {"foo": "bar", "bar": "Foo", "baz": "qux"}
+
+    dct = NormalizedDict([("foo-foo", "bar"), ("Bar_Bar", "Foo"), ("baz", "qux")])
+    assert dct == {"foo-foo": "bar", "bar_bar": "Foo", "baz": "qux"}
+
+    dct = NormalizedDict({"foo-foo": "bar", "Bar_Bar": "Foo", "baz": "qux"})
+    assert dct == {"foo-foo": "bar", "bar_bar": "Foo", "baz": "qux"}
+
+    dct = NormalizedDict.fromkeys(["foo", "bar"], 1)
+    assert dct == {"foo": 1, "bar": 1}
+
+
+def test_normalized_dict_setitem():
+    dct = NormalizedDict()
+    dct["FOO"] = "Bar"
+    assert dct["foo"] == "Bar"
+    assert dct.get("foo") == "Bar"
+
+    dct[(1, 1)] = "foo"
+    assert dct[(1, 1)] == "foo"
+
+
+def test_normalized_dict_getitem():
+    dct = NormalizedDict()
+    dct["foo"] = "bar"
+    assert dct["FOO"] == "bar"
+
+
+def test_normalized_dict_delitem():
+    dct = NormalizedDict()
+    dct["foo"] = "bar"
+    del dct["FOO"]
+    assert not dct
+    assert dct.get("foo") is None
+
+
+def test_normalized_dict_contains():
+    dct = NormalizedDict()
+    dct["foo"] = "bar"
+    assert "FOO" in dct
+    assert "bar" not in dct
+
+
+def test_normalized_dict_pop():
+    dct = NormalizedDict()
+    dct["foo"] = "bar"
+    assert dct.pop("FOO") == "bar"
+    assert not dct
+    assert dct.pop("bar", "baz") == "baz"
+
+
+def test_normalized_dict_get():
+    dct = NormalizedDict()
+    dct["foo"] = "bar"
+    assert dct.get("FOO") == "bar"
+    assert dct.get("FOO", "baz") == "bar"
+    assert dct.get("baz", "bar") == "bar"
+
+
+def test_normalized_dict_update():
+    dct = NormalizedDict()
+    dct["foo"] = "Bar"
+    dct.update({"FOO": "Baz", "bar": "Foo"})
+    assert dct == {"foo": "Baz", "bar": "Foo"}
+
+
+def test_normalized_dict_setdefault():
+    dct = NormalizedDict()
+    dct.setdefault("Foo", "bar")
+    assert dct["foo"] == "bar"
 
 
 def test_dict_usage():
