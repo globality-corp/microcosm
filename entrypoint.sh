@@ -19,19 +19,14 @@
 
 
 if [ "$1" = "test" ]; then
-   # Install standard test dependencies; YMMV
-   pip --quiet install \
-       .[test] nose PyHamcrest coverage
-   exec nosetests
+   pip install --no-cache-dir --upgrade --extra-index-url ${EXTRA_INDEX_URL} .\[build\]
+   exec pytest "$@"
 elif [ "$1" = "lint" ]; then
-   # Install standard linting dependencies; YMMV
-   pip --quiet install \
-       .[lint] flake8 flake8-print flake8-logging-format "isort<5" flake8-isort
+   pip install --no-cache-dir --upgrade --extra-index-url ${EXTRA_INDEX_URL} .\[build\]
    exec flake8 ${NAME}
 elif [ "$1" = "typehinting" ]; then
-   # Install standard type-linting dependencies
-   pip --quiet install mypy
-   mypy ${NAME} --ignore-missing-imports
+   pip install --no-cache-dir --upgrade --extra-index-url ${EXTRA_INDEX_URL} .\[build\]
+   exec mypy ${NAME}
 else
    echo "Cannot execute $@"
    exit 3
