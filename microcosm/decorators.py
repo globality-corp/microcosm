@@ -20,7 +20,7 @@ def binding(key: str, registry: Optional[Registry] = None) -> Callable[..., None
         registry = _registry
 
     def decorator(func):
-        registry.bind(key, func)  # type: ignore[union-attr]
+        registry.bind(key, func)
         return func
     return decorator
 

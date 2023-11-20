@@ -48,7 +48,7 @@ class Metadata:
         """
         module = modules.get(name)
         if module is not None and hasattr(module, '__file__'):
-            return dirname(abspath(module.__file__))
+            return dirname(abspath(module.__file__))  # type: ignore[type-var]
 
         # Flask keeps looking at this point. We instead set the root path to None,
         # assume that the user doesn't need resource loading, and raise an error
