@@ -22,8 +22,7 @@ from collections.abc import MutableMapping
 from contextlib import contextmanager
 from contextvars import ContextVar
 from copy import deepcopy
-from types import MethodType
-from typing import MutableMapping, Optional
+from typing import Optional
 
 
 class NormalizedDict(dict):  # type: ignore[type-arg]
