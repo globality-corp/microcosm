@@ -76,11 +76,10 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-
-
       - persist_to_workspace:
           root: ~/repo
           <<: *whitelist
+
   build_docker:
     <<: *defaults
     steps:
@@ -107,23 +106,18 @@ jobs:
 
             docker push $AWS_ECR_DOMAIN/python-library:$CIRCLE_SHA1
 
-
   test:
     <<: *defaults
     steps:
       - attach_workspace:
           at: ~/repo
-
       - setup_remote_docker:
           version: 19.03.12
           docker_layer_caching: true
-
       - run:
           name: Login AWS ECR
           command: |
             aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ECR_DOMAIN}
-
-
       - run:
           name: Copy service tests to volume
           command: |
@@ -133,16 +127,15 @@ jobs:
           name: Run Test
           command: |
             docker run -it  --volumes-from service_tests ${AWS_ECR_DOMAIN}/python-library:${CIRCLE_SHA1} test
+
   lint:
     <<: *defaults
     steps:
       - attach_workspace:
           at: ~/repo
-
       - setup_remote_docker:
           version: 19.03.12
           docker_layer_caching: true
-
       - run:
           name: Login AWS ECR
           command: |
@@ -157,18 +150,14 @@ jobs:
           command: |
             docker run -it --volumes-from service_tests ${AWS_ECR_DOMAIN}/python-library:${CIRCLE_SHA1} lint
 
-
-
   typehinting:
     <<: *defaults
     steps:
       - attach_workspace:
           at: ~/repo
-
       - setup_remote_docker:
           version: 19.03.12
           docker_layer_caching: true
-
       - run:
           name: Login AWS ECR
           command: |
@@ -182,8 +171,6 @@ jobs:
           name: Run Typehinting
           command: |
             docker run -it --volumes-from service_tests ${AWS_ECR_DOMAIN}/python-library:${CIRCLE_SHA1} typehinting
-
-
 
   deploy_jfrog_rc:
     <<: *defaults
@@ -209,6 +196,7 @@ jobs:
       - run:
           name: Publish
           command: python setup.py sdist upload -r jfrog
+
   publish_library:
     <<: *defaults
     steps:
@@ -233,7 +221,6 @@ jobs:
 
 
 workflows:
-
   build-and-release:
     jobs:
       - checkout:
