@@ -1,5 +1,5 @@
 """
-Enviroment-variable based loaders.
+Environment-variable based loaders.
 
 Uses a naming convention to map environment variables to nested configuration.
 
@@ -35,7 +35,7 @@ def _load_from_environ(metadata, value_func=None):
     prefix = metadata.name.upper().replace("-", "_")
 
     return expand_config(
-        environ,
+        dict(environ),
         separator="__",
         skip_to=1,
         key_parts_filter=lambda key_parts: len(key_parts) > 1 and key_parts[0] == prefix,

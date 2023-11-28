@@ -37,16 +37,17 @@ graph load time:
 
 
 """
+from typing import Any, Callable
 
 
 ON_RESOLVE = "_microcosm_on_resolve_"
 
 
-def _get_hook_name(hook_prefix, target_cls):
+def _get_hook_name(hook_prefix: str, target_cls: type):
     return f"{hook_prefix}_{target_cls.__name__}"
 
 
-def _invoke_hook(hook_prefix, target_component):
+def _invoke_hook(hook_prefix: str, target_component: Any) -> None:
     """
     Generic hook invocation.
 
@@ -64,7 +65,7 @@ def _invoke_hook(hook_prefix, target_component):
         pass
 
 
-def _register_hook(hook_prefix, target_cls, func, *args, **kwargs):
+def _register_hook(hook_prefix: str, target_cls: type, func: Callable[[Any, Any], None], *args, **kwargs) -> None:
     """
     Generic hook registration.
 
@@ -77,7 +78,7 @@ def _register_hook(hook_prefix, target_cls, func, *args, **kwargs):
         setattr(target_cls, hook_name, [call])
 
 
-def invoke_resolve_hook(target):
+def invoke_resolve_hook(target: Any) -> None:
     """
     Invoke resolution hook.
 
@@ -85,7 +86,7 @@ def invoke_resolve_hook(target):
     return _invoke_hook(ON_RESOLVE, target)
 
 
-def on_resolve(target, func, *args, **kwargs):
+def on_resolve(target: Any, func: Callable[..., None], *args, **kwargs) -> None:
     """
     Register a resolution hook.
 

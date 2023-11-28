@@ -3,9 +3,10 @@ Configuration types.
 
 """
 from distutils.util import strtobool
+from typing import List, Union
 
 
-def boolean(value):
+def boolean(value: Union[bool, str]) -> bool:
     """
     Configuration-friendly boolean type converter.
 
@@ -18,10 +19,10 @@ def boolean(value):
     if value == "":
         return False
 
-    return strtobool(value)
+    return bool(strtobool(value))
 
 
-def comma_separated_list(value):
+def comma_separated_list(value: Union[List[str], str]) -> List[str]:
     """
     Configuration-friendly list type converter.
 

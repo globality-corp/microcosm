@@ -2,6 +2,7 @@
 Configuration modeling, loading, and validation.
 
 """
+from typing import Any, Dict, Optional
 from warnings import warn
 
 from microcosm.config.sentinel import UNSET
@@ -9,7 +10,7 @@ from microcosm.config.types import boolean
 from microcosm.errors import ValidationError
 
 
-class Configuration(dict):
+class Configuration(Dict[Any, Any]):
     """
     Nested attribute dictionary with recursive merging for modeling configuration.
 
@@ -20,7 +21,11 @@ class Configuration(dict):
     but are also not needed (yet).
 
     """
-    def __init__(self, dct=None, **kwargs):
+    def __init__(
+        self,
+        dct: Optional[Dict[Any, Any]] = None,
+        **kwargs: Any
+    ) -> None:
         if dct is None:
             dct = {}
         if kwargs:
@@ -29,7 +34,7 @@ class Configuration(dict):
         for key, value in dct.items():
             setattr(self, key, value)
 
-    def __setattr__(self, name, value):
+    def __setattr__(self, name: str, value) -> None:
         if isinstance(value, list):
             value = [
                 self.__class__(x)
@@ -45,7 +50,7 @@ class Configuration(dict):
         super(Configuration, self).__setattr__(name, value)
         super(Configuration, self).__setitem__(name, value)
 
-    def merge(self, dct=None, **kwargs):
+    def merge(self, dct: Optional[Dict[Any, Any]] = None, **kwargs) -> None:
         """
         Recursively merge a dictionary or kwargs into the current dict.
 
@@ -57,9 +62,9 @@ class Configuration(dict):
 
         for key, value in dct.items():
             if all((
-                    isinstance(value, dict),
-                    isinstance(self.get(key), Configuration),
-                    getattr(self.get(key), "__merge__", True),
+                isinstance(value, dict),
+                isinstance(self.get(key), Configuration),
+                getattr(self.get(key), "__merge__", True),
             )):
                 # recursively merge
                 self[key].merge(value)
@@ -91,7 +96,7 @@ class Requirement:
     ):
         """
         :param type: a type callable
-        :param mock_value: a default value to use durint testing (only)
+        :param mock_value: a default value to use during testing (only)
 
         """
         self.type = type
