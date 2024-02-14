@@ -311,3 +311,7 @@ workflows:
           context:
           - Globality-Common
           - Python-Context
+          requires:
+            - test
+            - lint
+            - typehinting
