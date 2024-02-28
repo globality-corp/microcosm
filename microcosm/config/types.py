@@ -2,8 +2,24 @@
 Configuration types.
 
 """
-from distutils.util import strtobool
 from typing import List, Union
+
+
+def str_to_bool(val: str) -> bool:
+    """Convert a string representation of truth to bool.
+
+    True values are 'y', 'yes', 't', 'true', 'on', and '1'; false values
+    are 'n', 'no', 'f', 'false', 'off', and '0'.  Raises ValueError if
+    'val' is anything else.
+    """
+    val = val.lower()
+    if val in ("y", "yes", "t", "true", "on", "1"):
+        return True
+
+    if val in ("n", "no", "f", "false", "off", "0"):
+        return False
+
+    raise ValueError("invalid truth value %r" % (val,))
 
 
 def boolean(value: Union[bool, str]) -> bool:
@@ -19,7 +35,7 @@ def boolean(value: Union[bool, str]) -> bool:
     if value == "":
         return False
 
-    return bool(strtobool(value))
+    return str_to_bool(value)
 
 
 def comma_separated_list(value: Union[List[str], str]) -> List[str]:

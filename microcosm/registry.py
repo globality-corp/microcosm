@@ -3,7 +3,6 @@ Registry of component factories.
 
 """
 from itertools import chain
-from pkg_resources import DistributionNotFound, iter_entry_points  # type: ignore[import-untyped]
 from typing import (
     Any,
     Callable,
@@ -17,6 +16,14 @@ from lazy import lazy
 from microcosm.constants import DEFAULTS
 from microcosm.errors import AlreadyBoundError, NotBoundError
 from microcosm.typing import Component
+
+
+try:
+    # importlib_metadata from pypi is installed for version < 3.10
+    from importlib_metadata import entry_points as iter_entry_points  # type: ignore
+except ImportError:
+    # For versions > 3.10 we can just use the standard lib version of importlib
+    from importlib.metadata import entry_points as iter_entry_points  # type: ignore
 
 
 # TODO This should use Factory type def
@@ -35,6 +42,7 @@ class Registry:
     Supports factories resolved explicitly and via entrypoints.
 
     """
+
     def __init__(self):
         self.factories = {}
 
@@ -65,10 +73,7 @@ class Registry:
         Return a nested dictionary of all registered factory defaults.
 
         """
-        return {
-            key: get_defaults(value)
-            for key, value in self.all.items()
-        }
+        return {key: get_defaults(value) for key, value in self.all.items()}
 
     def bind(self, key: str, factory: Callable[[Any], Component]):
         """
@@ -99,11 +104,7 @@ class Registry:
 
     def _iter_entry_points(self) -> Iterator[Tuple[str, Callable[[Any], Component]]]:
         for entry_point in iter_entry_points(group="microcosm.factories"):
-            try:
-                factory = entry_point.load()
-            except DistributionNotFound:
-                continue
-
+            factory = entry_point.load()
             yield entry_point.name, factory
 
     def _resolve_from_binding(self, key: str) -> Callable[[Any], Component]:
