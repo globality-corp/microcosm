@@ -23,7 +23,8 @@ setup(
     python_requires=">=3.9",
     keywords="microcosm",
     install_requires=[
-        "importlib-metadata>=3.6 ; python_version < '3.10'",
+        # Requires for entrypoint by group, in later versions this is supported in standard lib
+        "importlib-metadata>=3.6 ; python_version < '3.10'",  
         "inflection>=0.5.1",
         "lazy>=1.6",
     ],

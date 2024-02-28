@@ -5,7 +5,7 @@ Configuration types.
 from typing import List, Union
 
 
-def strtobool(val):
+def str_to_bool(val: str) -> bool:
     """Convert a string representation of truth to true (1) or false (0).
 
     True values are 'y', 'yes', 't', 'true', 'on', and '1'; false values
@@ -34,7 +34,7 @@ def boolean(value: Union[bool, str]) -> bool:
     if value == "":
         return False
 
-    return bool(strtobool(value))
+    return bool(str_to_bool(value))
 
 
 def comma_separated_list(value: Union[List[str], str]) -> List[str]:

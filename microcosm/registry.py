@@ -17,10 +17,11 @@ from microcosm.constants import DEFAULTS
 from microcosm.errors import AlreadyBoundError, NotBoundError
 from microcosm.typing import Component
 
-
 try:
+    # importlib_metadata from pypi is installed for version < 3.10
     from importlib_metadata import entry_points as iter_entry_points  # type: ignore
 except ImportError:
+    # For versions > 3.10 we can just use the standard lib version of importlib
     from importlib.metadata import entry_points as iter_entry_points  # type: ignore
 
 
