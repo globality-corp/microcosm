@@ -8,16 +8,9 @@ to the graph lazily (or via `graph.use()`) and are cached for reuse.
 """
 from __future__ import annotations
 
+from collections.abc import Callable, Iterable
 from contextlib import contextmanager
-from typing import (
-    Any,
-    Callable,
-    Iterable,
-    List,
-    Optional,
-    Tuple,
-    Type,
-)
+from typing import Any
 
 from microcosm.caching import Cache, create_cache
 from microcosm.config.api import configure
@@ -52,7 +45,7 @@ class ObjectGraph:
         self._cache = cache
         self.loader = loader
 
-    def use(self, *keys: str) -> List[Component]:
+    def use(self, *keys: str) -> list[Component]:
         """
         Explicitly initialize a set of components by their binding keys.
 
@@ -117,8 +110,8 @@ class ObjectGraph:
 
     def __setattr__(self, key: str, value: Component) -> None:
         if not key.startswith("_") and key not in ("metadata", "config", "loader"):
-            raise Exception("Cannot setattr on ObjectGraph for key: {}".format(key))
-        super(ObjectGraph, self).__setattr__(key, value)
+            raise Exception(f"Cannot setattr on ObjectGraph for key: {key}")
+        super().__setattr__(key, value)
 
     @contextmanager
     def _reserve(self, key: str) -> Any:
@@ -150,7 +143,7 @@ class ObjectGraph:
 
         return self.assign(key, component)
 
-    def items(self) -> Iterable[Tuple[str, Component]]:
+    def items(self) -> Iterable[tuple[str, Component]]:
         """
         Iterates over tuples of (key, component) for all bound components.
         """
@@ -163,12 +156,12 @@ def create_object_graph(
     name: str,
     debug: bool = False,
     testing: bool = False,
-    import_name: Optional[str] = None,
-    root_path: Optional[str] = None,
+    import_name: str | None = None,
+    root_path: str | None = None,
     loader: Callable[[Metadata], Configuration] = load_from_environ,
     registry: Registry = _registry,
     profiler: Any = None,
-    cache: Optional[Type[Cache]] = None,
+    cache: type[Cache] | None = None,
     description: str = "",
 ) -> ObjectGraph:
     """

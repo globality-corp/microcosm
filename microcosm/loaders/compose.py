@@ -3,13 +3,8 @@ Functional composition of loaders.
 
 """
 from collections import defaultdict
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Iterable,
-    Optional,
-)
+from collections.abc import Callable, Iterable
+from typing import Any
 
 from microcosm.config.model import Configuration
 from microcosm.metadata import Metadata
@@ -95,10 +90,10 @@ class PartitioningLoader:
     """
     def __init__(self, **loaders):
         # NB: as long as we're using Python >= 3.6, the loader dict order is preserved
-        self.loaders: Dict[str, Loader] = loaders
-        self.partitions: Dict[str, Dict[str, str]] = defaultdict(dict)
+        self.loaders: dict[str, Loader] = loaders
+        self.partitions: dict[str, dict[str, str]] = defaultdict(dict)
 
-    def __getattr__(self, partition) -> Optional[Dict[str, str]]:
+    def __getattr__(self, partition) -> dict[str, str] | None:
         """
         Get all (post-merge) config data generated from a specific partition.
 

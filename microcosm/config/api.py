@@ -2,7 +2,7 @@
 Configuration API.
 
 """
-from typing import Any, Dict
+from typing import Any
 
 from microcosm.config.model import Configuration
 from microcosm.config.validation import validate
@@ -11,7 +11,7 @@ from microcosm.typing import Loader
 
 
 def configure(
-    defaults: Dict[str, Any],
+    defaults: dict[str, Any],
     metadata: Metadata,
     loader: Loader,
 ) -> Configuration:

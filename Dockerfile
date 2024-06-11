@@ -13,7 +13,7 @@
 
 # ----------- deps -----------
 # Install from Debian bullseye with modern Python support
-FROM python:3.9-slim-bullseye as deps
+FROM python:3.11-slim-bullseye as deps
 
 #
 # Most services will use the same set of packages here, though a few will install
@@ -80,7 +80,7 @@ ENV LC_ALL en_US.UTF-8
 # copy pyproject.toml and HISTORY.rst only if they exist
 COPY README.md MANIFEST.in setup.cfg setup.py pyproject.tom[l] HISTORY.rs[t] conftest.p[y] /src/
 
-RUN pip install --no-cache-dir --upgrade --extra-index-url ${EXTRA_INDEX_URL} /src/ && \
+RUN pip install --no-cache-dir --upgrade --extra-index-url "${EXTRA_INDEX_URL}" /src/ && \
     apt-get remove --purge -y ${BUILD_PACKAGES} && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*

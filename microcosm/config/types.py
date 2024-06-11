@@ -2,7 +2,6 @@
 Configuration types.
 
 """
-from typing import List, Union
 
 
 def str_to_bool(val: str) -> bool:
@@ -19,10 +18,10 @@ def str_to_bool(val: str) -> bool:
     if val in ("n", "no", "f", "false", "off", "0"):
         return False
 
-    raise ValueError("invalid truth value %r" % (val,))
+    raise ValueError("invalid truth value {!r}".format(val))
 
 
-def boolean(value: Union[bool, str]) -> bool:
+def boolean(value: bool | str) -> bool:
     """
     Configuration-friendly boolean type converter.
 
@@ -38,7 +37,7 @@ def boolean(value: Union[bool, str]) -> bool:
     return str_to_bool(value)
 
 
-def comma_separated_list(value: Union[List[str], str]) -> List[str]:
+def comma_separated_list(value: list[str] | str) -> list[str]:
     """
     Configuration-friendly list type converter.
 

@@ -4,7 +4,6 @@ Service metadata
 """
 from os.path import abspath, dirname, join
 from sys import modules
-from typing import Optional
 
 
 class Metadata:
@@ -20,8 +19,8 @@ class Metadata:
         name: str,
         debug: bool = False,
         testing: bool = False,
-        import_name: Optional[str] = None,
-        root_path: Optional[str] = None,
+        import_name: str | None = None,
+        root_path: str | None = None,
         description: str = "",
     ):
         """

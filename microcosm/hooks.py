@@ -37,7 +37,8 @@ graph load time:
 
 
 """
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 
 ON_RESOLVE = "_microcosm_on_resolve_"
