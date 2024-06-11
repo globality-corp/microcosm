@@ -2,20 +2,16 @@
 Key expansion.
 
 """
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    List,
-)
+from collections.abc import Callable
+from typing import Any
 
 
 def expand_config(
-    dct: Dict[Any, Any],
+    dct: dict[Any, Any],
     separator: str = '.',
     skip_to: int = 0,
     key_func: Callable[[str], str] = lambda key: key.lower(),
-    key_parts_filter: Callable[[List[str]], bool] = lambda key_parts: True,
+    key_parts_filter: Callable[[list[str]], bool] = lambda key_parts: True,
     value_func: Callable[[str], str] = lambda value: value
 ):
     """
@@ -29,7 +25,7 @@ def expand_config(
     :param value_func: a value mapping func
 
     """
-    config: Dict[str, Any] = {}
+    config: dict[str, Any] = {}
 
     for key, value in dct.items():
         key_separator = separator(key) if callable(separator) else separator

@@ -8,12 +8,8 @@ Alternate cache implementations can be used to speed up performance
 
 """
 from collections import defaultdict
-from typing import (
-    Any,
-    Dict,
-    MutableMapping,
-    Optional,
-)
+from collections.abc import MutableMapping
+from typing import Any
 
 
 class Cache(MutableMapping[str, str]):
@@ -26,7 +22,7 @@ class Cache(MutableMapping[str, str]):
         raise NotImplementedError
 
 
-class NaiveCache(Dict[Any, Any], Cache):
+class NaiveCache(dict[Any, Any], Cache):
     """
     Cache components in a dictionary.
 
@@ -52,7 +48,7 @@ class ProcessCache(Cache):
     time (at the expense of a "clean slate" testing context).
 
     """
-    CACHES: Dict[str, Dict[str, Any]] = defaultdict(dict)
+    CACHES: dict[str, dict[str, Any]] = defaultdict(dict)
 
     @classmethod
     def name(cls):
@@ -80,7 +76,7 @@ class ProcessCache(Cache):
         return len(ProcessCache.CACHES[self.scope])
 
 
-def create_cache(name: Optional[str]):
+def create_cache(name: str | None):
     """
     Create a cache by name.
 

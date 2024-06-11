@@ -2,7 +2,7 @@
 Configuration modeling, loading, and validation.
 
 """
-from typing import Any, Dict, Optional
+from typing import Any
 from warnings import warn
 
 from microcosm.config.sentinel import UNSET
@@ -10,7 +10,7 @@ from microcosm.config.types import boolean
 from microcosm.errors import ValidationError
 
 
-class Configuration(Dict[Any, Any]):
+class Configuration(dict[Any, Any]):
     """
     Nested attribute dictionary with recursive merging for modeling configuration.
 
@@ -23,7 +23,7 @@ class Configuration(Dict[Any, Any]):
     """
     def __init__(
         self,
-        dct: Optional[Dict[Any, Any]] = None,
+        dct: dict[Any, Any] | None = None,
         **kwargs: Any
     ) -> None:
         if dct is None:
@@ -47,10 +47,10 @@ class Configuration(Dict[Any, Any]):
             )
         else:
             value = self.__class__(value) if isinstance(value, dict) else value
-        super(Configuration, self).__setattr__(name, value)
-        super(Configuration, self).__setitem__(name, value)
+        super().__setattr__(name, value)
+        super().__setitem__(name, value)
 
-    def merge(self, dct: Optional[Dict[Any, Any]] = None, **kwargs) -> None:
+    def merge(self, dct: dict[Any, Any] | None = None, **kwargs) -> None:
         """
         Recursively merge a dictionary or kwargs into the current dict.
 

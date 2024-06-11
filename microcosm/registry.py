@@ -2,14 +2,9 @@
 Registry of component factories.
 
 """
+from collections.abc import Callable, Iterator
 from itertools import chain
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Iterator,
-    Tuple,
-)
+from typing import Any
 
 from lazy import lazy
 
@@ -27,7 +22,7 @@ except ImportError:
 
 
 # TODO This should use Factory type def
-def get_defaults(func: Callable[[Any], Component]) -> Dict[str, Any]:
+def get_defaults(func: Callable[[Any], Component]) -> dict[str, Any]:
     """
     Retrieve the defaults for a factory function.
 
@@ -47,7 +42,7 @@ class Registry:
         self.factories = {}
 
     @lazy
-    def entry_points(self) -> Dict[str, Callable[[Any], Component]]:
+    def entry_points(self) -> dict[str, Callable[[Any], Component]]:
         return {
             name: factory
             # NB: it's possible to have two entry points for the same name
@@ -57,7 +52,7 @@ class Registry:
         }
 
     @property
-    def all(self) -> Dict[str, Callable[[Any], Component]]:
+    def all(self) -> dict[str, Callable[[Any], Component]]:
         """
         Return a synthetic dictionary of all factories.
 
@@ -68,7 +63,7 @@ class Registry:
         }
 
     @property
-    def defaults(self) -> Dict[str, Dict[str, Any]]:
+    def defaults(self) -> dict[str, dict[str, Any]]:
         """
         Return a nested dictionary of all registered factory defaults.
 
@@ -102,7 +97,7 @@ class Registry:
         except NotBoundError:
             return self._resolve_from_entry_point(key)
 
-    def _iter_entry_points(self) -> Iterator[Tuple[str, Callable[[Any], Component]]]:
+    def _iter_entry_points(self) -> Iterator[tuple[str, Callable[[Any], Component]]]:
         for entry_point in iter_entry_points(group="microcosm.factories"):
             factory = entry_point.load()
             yield entry_point.name, factory

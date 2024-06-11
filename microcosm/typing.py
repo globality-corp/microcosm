@@ -1,4 +1,5 @@
-from typing import Any, Callable, Union
+from collections.abc import Callable
+from typing import Any, Union
 
 from microcosm.config.model import Configuration
 from microcosm.metadata import Metadata

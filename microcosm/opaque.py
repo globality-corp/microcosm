@@ -22,7 +22,6 @@ from collections.abc import MutableMapping
 from contextlib import contextmanager
 from contextvars import ContextVar
 from copy import deepcopy
-from typing import Optional
 
 
 class NormalizedDict(dict):  # type: ignore[type-arg]
@@ -112,7 +111,7 @@ class Opaque(MutableMapping[str, str]):
     """
 
     def __init__(self, *args, **kwargs) -> None:
-        self.service_name: Optional[str] = kwargs.pop("name", None)
+        self.service_name: str | None = kwargs.pop("name", None)
         self._store = ContextVar("store", default=NormalizedDict(*args, **kwargs))
         self.initialize = _make_initializer(self)
 

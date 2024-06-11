@@ -2,7 +2,7 @@
 Validation for configuration.
 
 """
-from typing import Any, Dict, Tuple
+from typing import Any
 
 from microcosm.config.model import Configuration, Requirement
 from microcosm.metadata import Metadata
@@ -36,7 +36,7 @@ def validate(defaults, metadata: Metadata, config: Configuration) -> None:
             parent[path[-1]] = default.validate(metadata, path, value)
 
 
-def zip_dicts(left: Dict[Any, Any], right: Dict[Any, Any], prefix: Tuple[str, ...] = ()):
+def zip_dicts(left: dict[Any, Any], right: dict[Any, Any], prefix: tuple[str, ...] = ()):
     """
     Modified zip through two dictionaries.
 

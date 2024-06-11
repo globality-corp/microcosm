@@ -2,13 +2,13 @@
 Factory decorators
 
 """
-from typing import Callable, Optional
+from collections.abc import Callable
 
 from microcosm.constants import DEFAULTS
 from microcosm.registry import Registry, _registry
 
 
-def binding(key: str, registry: Optional[Registry] = None) -> Callable[..., None]:
+def binding(key: str, registry: Registry | None = None) -> Callable[..., None]:
     """
     Creates a decorator that binds a factory function to a key.
 
