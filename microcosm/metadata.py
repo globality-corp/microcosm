@@ -14,7 +14,15 @@ class Metadata:
 
     """
 
-    def __init__(self, name, debug=False, testing=False, import_name=None, root_path=None, description=""):
+    def __init__(
+        self,
+        name: str,
+        debug: bool = False,
+        testing: bool = False,
+        import_name: str | None = None,
+        root_path: str | None = None,
+        description: str = "",
+    ):
         """
         :param name: the name of the microservice
         :param debug: is development debugging enabled?

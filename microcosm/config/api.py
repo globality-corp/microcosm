@@ -2,11 +2,19 @@
 Configuration API.
 
 """
+from typing import Any
+
 from microcosm.config.model import Configuration
 from microcosm.config.validation import validate
+from microcosm.metadata import Metadata
+from microcosm.typing import Loader
 
 
-def configure(defaults, metadata, loader):
+def configure(
+    defaults: dict[str, Any],
+    metadata: Metadata,
+    loader: Loader,
+) -> Configuration:
     """
     Build a fresh configuration.
 

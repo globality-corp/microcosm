@@ -12,7 +12,8 @@
 #
 
 # ----------- deps -----------
-FROM python:3.7-stretch as deps
+# Install from Debian bullseye with modern Python support
+FROM python:3.11-slim-bullseye as deps
 
 #
 # Most services will use the same set of packages here, though a few will install
@@ -22,7 +23,7 @@ FROM python:3.7-stretch as deps
 ARG EXTRA_INDEX_URL
 ENV EXTRA_INDEX_URL ${EXTRA_INDEX_URL}
 
-ENV CORE_PACKAGES locales
+ENV CORE_PACKAGES locales libpq-dev
 ENV BUILD_PACKAGES build-essential libffi-dev
 ENV OTHER_PACKAGES libssl-dev
 
@@ -79,7 +80,7 @@ ENV LC_ALL en_US.UTF-8
 # copy pyproject.toml and HISTORY.rst only if they exist
 COPY README.md MANIFEST.in setup.cfg setup.py pyproject.tom[l] HISTORY.rs[t] conftest.p[y] /src/
 
-RUN pip install --no-cache-dir --upgrade --extra-index-url ${EXTRA_INDEX_URL} /src/ && \
+RUN pip install --no-cache-dir --upgrade --extra-index-url "${EXTRA_INDEX_URL}" /src/ && \
     apt-get remove --purge -y ${BUILD_PACKAGES} && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*
@@ -101,7 +102,6 @@ ENTRYPOINT ["./entrypoint.sh"]
 # We should not need to reinstall dependencies here, but we do need to import
 # the distribution properly. We also save build arguments to the image using
 # microcosm-compatible environment variables.
-
 
 ARG BUILD_NUM
 ARG SHA1

@@ -19,36 +19,75 @@ easier debugging of distributed operations.
 
 """
 from collections.abc import MutableMapping
-from contextlib import ContextDecorator, ExitStack
+from contextlib import contextmanager
+from contextvars import ContextVar
 from copy import deepcopy
-from types import MethodType
+
+
+class NormalizedDict(dict):  # type: ignore[type-arg]
+    """
+    Dict where all str keys are lowercase and read methods are case-insensitive.
+
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for key in list(self.keys()):
+            value = super().pop(key)
+            self[key] = value
+
+    def __setitem__(self, key, value):
+        super().__setitem__(self._convert_key(key), value)
+
+    def __getitem__(self, key):
+        return super().__getitem__(self._convert_key(key))
+
+    def __delitem__(self, key):
+        super().__delitem__(self._convert_key(key))
+
+    def __contains__(self, key):
+        return super().__contains__(self._convert_key(key))
+
+    def pop(self, key, *args, **kwargs):
+        return super().pop(self._convert_key(key), *args, **kwargs)
+
+    def get(self, key, *args, **kwargs):
+        return super().get(self._convert_key(key), *args, **kwargs)
+
+    def update(self, *args, **kwargs):
+        for key, value in dict(*args, **kwargs).items():
+            self[key] = value
+
+    def setdefault(self, key, *args, **kwargs):
+        super().setdefault(self._convert_key(key), *args, **kwargs)
+
+    @classmethod
+    def fromkeys(cls, keys, v=None):
+        keys = (
+            cls._convert_key(key)
+            for key in keys
+        )
+        return super().fromkeys(keys, v)
+
+    @staticmethod
+    def _convert_key(key):
+        return key.casefold() if isinstance(key, str) else key
 
 
 def _make_initializer(opaque):
+    @contextmanager
+    def initialiser(func, *args, **kwargs):
+        token = opaque._store.set(deepcopy(opaque._store.get()))
+        opaque.update(func(*args, **kwargs))
+        try:
+            yield
+        finally:
+            opaque._store.reset(token)
 
-    class OpaqueInitializer(ContextDecorator, ExitStack):
-        def __init__(self, func, *args, **kwargs):
-            super().__init__()
-
-            def member_func(self):
-                return func(*args, **kwargs)
-
-            self.func = MethodType(member_func, self)
-            self.saved = None
-
-        def __enter__(self):
-            self.saved = deepcopy(opaque._store)
-            opaque.update(self.func())
-
-        def __exit__(self, *exc):
-            opaque._store = self.saved
-            self.saved = None
-            super().__exit__(*exc)
-
-    return OpaqueInitializer
+    return initialiser
 
 
-class Opaque(MutableMapping):
+class Opaque(MutableMapping[str, str]):
     """
     Define a dict-like opaque context that can be initialized with application-specific values.
 
@@ -70,29 +109,30 @@ class Opaque(MutableMapping):
     See tests for usage examples.
 
     """
-    def __init__(self, *args, **kwargs):
-        self.service_name = kwargs.pop("name", None)
-        self._store = dict(*args, **kwargs)
+
+    def __init__(self, *args, **kwargs) -> None:
+        self.service_name: str | None = kwargs.pop("name", None)
+        self._store = ContextVar("store", default=NormalizedDict(*args, **kwargs))
         self.initialize = _make_initializer(self)
 
     def __getitem__(self, key):
-        return self._store[key]
+        return self._store.get()[key]
 
     def __setitem__(self, key, value):
-        self._store[key] = value
+        self._store.get()[key] = value
 
     def __delitem__(self, key):
-        del self._store[key]
+        del self._store.get()[key]
 
     def __iter__(self):
-        return iter(self._store)
+        return iter(self._store.get())
 
     def __len__(self):
-        return len(self._store)
+        return len(self._store.get())
 
     def as_dict(self):
-        return self._store
+        return self._store.get()
 
 
-def configure_opaque(graph):
+def configure_opaque(graph) -> Opaque:
     return Opaque(graph.config.opaque, name=graph.metadata.name)

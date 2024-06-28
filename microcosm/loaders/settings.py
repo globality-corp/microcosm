@@ -5,26 +5,30 @@ The settings file is identified using a `FOO_SETTINGS` environment variable
 and consumed using a customizable load function (default: json).
 
 """
+from collections.abc import Callable, Mapping
 from json import loads
 from os import environ
+from typing import Any
 
 from inflection import underscore
 
+from microcosm.metadata import Metadata
 
-def get_config_filename(metadata):
+
+def get_config_filename(metadata: Metadata) -> str | None:
     """
     Derive a configuration file name from the FOO_SETTINGS
     environment variable.
 
     """
-    envvar = "{}__SETTINGS".format(underscore(metadata.name).upper())
+    envvar = f"{underscore(metadata.name).upper()}__SETTINGS"
     try:
         return environ[envvar]
     except KeyError:
         return None
 
 
-def _load_from_file(metadata, load_func):
+def _load_from_file(metadata: Metadata, load_func: Callable[[str], Mapping[str, str]]) -> dict[Any, Any]:
     """
     Load configuration from a file.
 
@@ -36,12 +40,12 @@ def _load_from_file(metadata, load_func):
     if config_filename is None:
         return dict()
 
-    with open(config_filename, "r") as file_:
+    with open(config_filename) as file_:
         data = load_func(file_.read())
         return dict(data)
 
 
-def load_from_json_file(metadata):
+def load_from_json_file(metadata: Metadata) -> dict[Any, Any]:
     """
     Load configuration from a JSON file.
 

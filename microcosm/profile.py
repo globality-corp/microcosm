@@ -7,7 +7,7 @@ from time import time
 
 class NoopProfiler:
 
-    def __call__(self, key):
+    def __call__(self, key: str) -> 'NoopProfiler':
         return self
 
     def __enter__(self):
@@ -36,7 +36,7 @@ class TimingProfiler:
 
     def __str__(self):
         return "\n".join(
-            "{:10.8f} - {}".format(value, key)
+            f"{value:10.8f} - {key}"
             for key, value in sorted(
                     self.times.items(),
                     key=lambda item: -item[1],

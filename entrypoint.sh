@@ -24,19 +24,15 @@
 
 
 if [ "$1" = "test" ]; then
-   # Install standard test dependencies; YMMV
-   pip --quiet install \
-       .[test]
-   nosetests
+   pip install --no-cache-dir --upgrade --extra-index-url ${EXTRA_INDEX_URL} .\[build\]
+   shift
+   exec pytest "$@"
 elif [ "$1" = "lint" ]; then
-   # Install standard linting dependencies; YMMV
-   pip --quiet install \
-       .[lint]
+   pip install --no-cache-dir --upgrade --extra-index-url ${EXTRA_INDEX_URL} .\[build\]
    exec flake8 ${NAME}
 elif [ "$1" = "typehinting" ]; then
-   # Install standard type-linting dependencies
-   pip --quiet install mypy types-python-dateutil types-setuptools
-   exec mypy ${NAME} --ignore-missing-imports
+   pip install --no-cache-dir --upgrade --extra-index-url ${EXTRA_INDEX_URL} .\[build\]
+   exec mypy ${NAME}
 else
    echo "Cannot execute $@"
    exit 3

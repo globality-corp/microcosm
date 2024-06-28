@@ -2,7 +2,7 @@
 Test hook invocation.
 
 """
-from hamcrest import assert_that, contains
+from hamcrest import assert_that, contains_exactly
 
 from microcosm.api import binding, create_object_graph
 from microcosm.hooks import on_resolve
@@ -47,7 +47,7 @@ class TestHooks:
         graph.use("foo")
         graph.lock()
 
-        assert_that(graph.foo.callbacks, contains("baz"))
+        assert_that(graph.foo.callbacks, contains_exactly("baz"))
 
     def test_on_resolve_foo_again(self):
         """
@@ -58,7 +58,7 @@ class TestHooks:
         graph.use("foo")
         graph.lock()
 
-        assert_that(graph.foo.callbacks, contains("baz"))
+        assert_that(graph.foo.callbacks, contains_exactly("baz"))
 
     def test_on_resolve_foo_subfoo(self):
         """
@@ -71,8 +71,8 @@ class TestHooks:
         graph.use("subfoo")
         graph.lock()
 
-        assert_that(graph.foo.callbacks, contains("baz"))
-        assert_that(graph.subfoo.callbacks, contains("qux"))
+        assert_that(graph.foo.callbacks, contains_exactly("baz"))
+        assert_that(graph.subfoo.callbacks, contains_exactly("qux"))
 
     def test_on_resolve_bar_once(self):
         """
@@ -83,7 +83,7 @@ class TestHooks:
         graph.use("bar")
         graph.lock()
 
-        assert_that(graph.bar.callbacks, contains("baz"))
+        assert_that(graph.bar.callbacks, contains_exactly("baz"))
 
     def test_on_resolve_bar_again(self):
         """
@@ -94,4 +94,4 @@ class TestHooks:
         graph.use("bar")
         graph.lock()
 
-        assert_that(graph.bar.callbacks, contains("baz"))
+        assert_that(graph.bar.callbacks, contains_exactly("baz"))

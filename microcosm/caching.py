@@ -9,31 +9,31 @@ Alternate cache implementations can be used to speed up performance
 """
 from collections import defaultdict
 from collections.abc import MutableMapping
-from typing import Any, Mapping
+from typing import Any
 
 
-class Cache(MutableMapping):
+class Cache(MutableMapping[str, str]):
     """
     A cache supports the basic dictionary interface and defines a name.
 
     """
     @classmethod
-    def name(self):
+    def name(cls):
         raise NotImplementedError
 
 
-class NaiveCache(dict, Cache):
+class NaiveCache(dict[Any, Any], Cache):
     """
     Cache components in a dictionary.
 
     Under most circumstances, every instantiation of an object graph
-    results in a new `NaiveCache` and a new instantitation of components.
+    results in a new `NaiveCache` and a new instantiation of components.
 
     Most applications will want a `NaiveCache` for "real" usage.
 
     """
     @classmethod
-    def name(self):
+    def name(cls):
         return "naive"
 
 
@@ -48,10 +48,10 @@ class ProcessCache(Cache):
     time (at the expense of a "clean slate" testing context).
 
     """
-    CACHES: Mapping[str, Mapping[str, Any]] = defaultdict(dict)
+    CACHES: dict[str, dict[str, Any]] = defaultdict(dict)
 
     @classmethod
-    def name(self):
+    def name(cls):
         return "process"
 
     def __init__(self, scope="default"):
@@ -76,7 +76,7 @@ class ProcessCache(Cache):
         return len(ProcessCache.CACHES[self.scope])
 
 
-def create_cache(name):
+def create_cache(name: str | None):
     """
     Create a cache by name.
 
@@ -87,4 +87,4 @@ def create_cache(name):
         subclass.name(): subclass
         for subclass in Cache.__subclasses__()
     }
-    return caches.get(name, NaiveCache)()
+    return caches.get(name, NaiveCache)()  # type: ignore[abstract]

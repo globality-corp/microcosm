@@ -1,0 +1,181 @@
+---
+kind: pipeline
+type: kubernetes
+name: build
+
+environment:
+  NAME: microcosm
+
+trigger:
+  event:
+    - push
+
+
+
+steps:
+  - name: lint-and-type-check
+    image: python:3.11-slim
+    environment:
+      AWS_ACCOUNT_ID:
+        from_secret: AWS_ACCOUNT_ID
+      AWS_ACCESS_KEY_ID:
+        from_secret: AWS_ACCESS_KEY_ID
+      AWS_SECRET_ACCESS_KEY:
+        from_secret: AWS_SECRET_ACCESS_KEY
+      EXTRA_INDEX_URL:
+        from_secret: EXTRA_INDEX_URL
+    commands:
+      - pip install -U pip==24.0
+      - pip install awscli
+      - aws codeartifact login --tool pip --repository globality-pypi-local --domain globality --domain-owner $AWS_ACCOUNT_ID --region us-east-1
+      - ./entrypoint.sh lint
+      - ./entrypoint.sh typehinting
+
+  - name: test-py311-latest
+    image: python:3.11-slim
+    environment:
+      AWS_ACCOUNT_ID:
+        from_secret: AWS_ACCOUNT_ID
+      AWS_ACCESS_KEY_ID:
+        from_secret: AWS_ACCESS_KEY_ID
+      AWS_SECRET_ACCESS_KEY:
+        from_secret: AWS_SECRET_ACCESS_KEY
+      EXTRA_INDEX_URL:
+        from_secret: EXTRA_INDEX_URL
+    commands:
+      - pip install -U pip==24.0
+      - pip install awscli
+      - aws codeartifact login --tool pip --repository globality-pypi-local --domain globality --domain-owner $AWS_ACCOUNT_ID --region us-east-1
+      - ./entrypoint.sh test
+    depends_on:
+      - lint-and-type-check
+
+  - name: sonar-scanner
+    image: sonarsource/sonar-scanner-cli:latest
+    environment:
+      SONARQUBE_TOKEN:
+        from_secret: SONARQUBE_TOKEN
+    commands:
+      - >-
+        sonar-scanner
+        -Dsonar.login=$SONARQUBE_TOKEN
+        -Dsonar.projectBaseDir=/drone/src
+        -Dsonar.host.url=https://sonarqube.globality.cloud
+        -Dsonar.branch.name=${DRONE_BRANCH}
+    depends_on:
+      - lint-and-type-check
+      - test-py311-latest
+
+  - name: release-python-library-codeartifact
+    image: python:3.11-slim
+    environment:
+      AWS_ACCESS_KEY_ID:
+        from_secret: AWS_ACCESS_KEY_ID
+      AWS_SECRET_ACCESS_KEY:
+        from_secret: AWS_SECRET_ACCESS_KEY
+      AWS_ACCOUNT_ID:
+        from_secret: AWS_ACCOUNT_ID
+    depends_on:
+      - sonar-scanner
+    commands:
+      - pip install -U pip==24.0
+      - pip install --quiet awscli twine==4.0.2 packaging==24.0 importlib-metadata==4.8.1
+      - export version=$(cat .bumpversion.cfg | awk '/current_version / {print $3}')
+      - aws codeartifact login --tool pip --repository globality-pypi-local --domain globality --domain-owner $AWS_ACCOUNT_ID --region us-east-1
+      - python setup.py sdist bdist_wheel
+      - aws codeartifact login --tool twine --domain globality --repository globality-pypi-local --region us-east-1 && twine upload --repository codeartifact dist/microcosm-${version}* --verbose
+    when:
+      branch:
+        - master
+
+  - name: publish_library_to_pypi
+    image: python:3.11-slim
+    depends_on:
+      - release-python-library-codeartifact
+    environment:
+      TWINE_USERNAME: __token__
+      TWINE_PASSWORD:
+        from_secret: PYPI_TOKEN
+      TWINE_REPOSITORY: https://upload.pypi.org/legacy/
+    commands:
+      - pip install -U pip==24.0
+      - pip install --quiet awscli twine==4.0.2 importlib-metadata==4.8.1
+      - export version=$(cat .bumpversion.cfg | awk '/current_version / {print $3}')
+      - echo "Publishing ${version}"
+      - python setup.py sdist bdist_wheel
+      - twine upload --repository pypi dist/microcosm-${version}* --non-interactive --verbose
+    when:
+      branch:
+        - master
+
+---
+kind: pipeline
+type: kubernetes
+name: pr
+
+trigger:
+  event:
+    - pull_request
+
+steps:
+  - name: dependency-validation-dummy
+    pull: always
+    image: python:3.11-slim
+    commands:
+      - echo "Dummy step to trigger dependency-validation"
+
+---
+kind: secret
+name: AWS_ACCOUNT_ID
+get:
+  path: secrets/dev/drone
+  name: AWS_ACCOUNT_ID
+
+---
+kind: secret
+name: PYPI_TOKEN
+get:
+  path: secrets/dev/drone
+  name: PYPI_TOKEN
+
+---
+kind: secret
+name: CFGR_GITHUB_PRIVATE_KEY
+get:
+  path: secrets/dev/drone
+  name: CFGR_GITHUB_PRIVATE_KEY
+
+---
+kind: secret
+name: AWS_ACCESS_KEY_ID
+get:
+  path: secrets/dev/drone
+  name: DRONE_AWS_ACCESS_KEY
+
+---
+kind: secret
+name: AWS_SECRET_ACCESS_KEY
+get:
+  path: secrets/dev/drone
+  name: DRONE_AWS_ACCESS_SECRET_KEY
+
+---
+kind: secret
+name: EXTRA_INDEX_URL
+get:
+  path: secrets/dev/drone
+  name: DRONE_EXTRA_INDEX_URL
+
+---
+kind: secret
+name: GITHUB_PRIVATE_KEY
+get:
+  path: secrets/dev/drone
+  name: DRONE_GITHUB_PRIVATE_KEY
+
+---
+kind: secret
+name: SONARQUBE_TOKEN
+get:
+  path: secrets/dev/drone
+  name: DRONE_SONARQUBE_TOKEN
