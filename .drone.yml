@@ -47,6 +47,8 @@ steps:
       - pip install awscli
       - aws codeartifact login --tool pip --repository globality-pypi-local --domain globality --domain-owner $AWS_ACCOUNT_ID --region us-east-1
       - ./entrypoint.sh test
+    depends_on:
+      - lint-and-type-check
 
   - name: sonar-scanner
     image: sonarsource/sonar-scanner-cli:latest
@@ -77,7 +79,7 @@ steps:
       - sonar-scanner
     commands:
       - pip install -U pip==24.0
-      - pip install --quiet awscli twine==4.0.2 packaging==24.0
+      - pip install --quiet awscli twine==4.0.2 packaging==24.0 importlib-metadata==4.8.1
       - export version=$(cat .bumpversion.cfg | awk '/current_version / {print $3}')
       - aws codeartifact login --tool pip --repository globality-pypi-local --domain globality --domain-owner $AWS_ACCOUNT_ID --region us-east-1
       - python setup.py sdist bdist_wheel
@@ -97,7 +99,7 @@ steps:
       TWINE_REPOSITORY: https://upload.pypi.org/legacy/
     commands:
       - pip install -U pip==24.0
-      - pip install --quiet awscli twine==4.0.2
+      - pip install --quiet awscli twine==4.0.2 importlib-metadata==4.8.1
       - export version=$(cat .bumpversion.cfg | awk '/current_version / {print $3}')
       - echo "Publishing ${version}"
       - python setup.py sdist bdist_wheel
